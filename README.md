@@ -5,6 +5,9 @@
 
 Una brújula para Android que no apunta al norte. Apunta siempre a Londres.
 
+[![Android CI](https://github.com/parrazam/brujula-de-lezo/actions/workflows/android.yml/badge.svg)](https://github.com/parrazam/brujula-de-lezo/actions/workflows/android.yml)
+[![Release](https://img.shields.io/github/v/release/parrazam/brujula-de-lezo?label=release)](https://github.com/parrazam/brujula-de-lezo/releases/latest)
+
 🌐 [brujuladelezo.cuzo.dev](https://brujuladelezo.cuzo.dev)
 
 ---
