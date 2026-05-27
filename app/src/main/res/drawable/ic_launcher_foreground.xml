@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Compass needle pointing up over a faint Burgundy Cross -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Cruz de Borgoña diagonal arms (faint, semi-transparent) -->
+    <path
+        android:strokeColor="#55AA151B"
+        android:strokeWidth="6"
+        android:pathData="M20,20 L88,88"
+        android:strokeLineCap="round" />
+    <path
+        android:strokeColor="#55AA151B"
+        android:strokeWidth="6"
+        android:pathData="M88,20 L20,88"
+        android:strokeLineCap="round" />
+
+    <!-- Needle arrow head pointing up (azul marino) -->
+    <path
+        android:fillColor="#2B3F6E"
+        android:pathData="M54,16 L62,54 L54,48 L46,54 Z" />
+
+    <!-- Needle tail (semi-transparent) -->
+    <path
+        android:fillColor="#882B3F6E"
+        android:pathData="M50,54 L58,54 L58,74 L50,74 Z" />
+
+    <!-- Center circle -->
+    <path
+        android:fillColor="#C9A227"
+        android:pathData="M54,54 m-6,0 a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0" />
+</vector>
