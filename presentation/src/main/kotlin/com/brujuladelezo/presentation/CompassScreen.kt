@@ -120,6 +120,16 @@ private fun CompassContent(uiState: CompassUiState) {
             .fillMaxSize()
             .padding(24.dp),
     ) {
+        // "Pointing at London" message — parte superior
+        AnimatedVisibility(visible = uiState.isPointingAtLondon) {
+            Text(
+                text = "¡Apuntando a la pérfida Albión!",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.tertiary,
+                textAlign = TextAlign.Center,
+            )
+        }
+
         // Calibration warning
         AnimatedVisibility(
             visible = uiState.accuracy == CompassAccuracy.BAJA || uiState.accuracy == CompassAccuracy.NO_FIABLE
@@ -143,18 +153,6 @@ private fun CompassContent(uiState: CompassUiState) {
         }
 
         Spacer(modifier = Modifier.height(24.dp))
-
-        // "Pointing at London" message
-        AnimatedVisibility(visible = uiState.isPointingAtLondon) {
-            Text(
-                text = "¡Apuntando a la pérfida Albión!",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.tertiary,
-                textAlign = TextAlign.Center,
-            )
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
 
         // Quote
         Text(
