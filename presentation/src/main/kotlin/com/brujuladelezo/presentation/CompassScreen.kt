@@ -42,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.graphicsLayer
+import android.annotation.SuppressLint
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -239,6 +240,7 @@ private fun shortestAngleDiff(target: Float, current: Float): Float {
     return diff
 }
 
+@SuppressLint("MissingPermission") // VIBRATE declarado en :app/AndroidManifest.xml
 private fun vibrateDevice(context: Context) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         val manager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
