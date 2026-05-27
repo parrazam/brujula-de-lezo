@@ -24,6 +24,7 @@ captures/
 Thumbs.db
 
 # Keys / secrets
+keystore/
 *.keystore
 *.jks
 .env
