@@ -1,7 +1,7 @@
-package com.brujuladelezo.app
+package com.brujuladelezo
 
 import android.app.Application
-import com.brujuladelezo.app.di.AppContainer
+import com.brujuladelezo.di.AppContainer
 
 class BrujulaApplication : Application() {
     lateinit var container: AppContainer

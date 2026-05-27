@@ -1,4 +1,4 @@
-package com.brujuladelezo.app.di
+package com.brujuladelezo.di
 
 import android.content.Context
 import android.hardware.SensorManager

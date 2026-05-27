@@ -1,4 +1,4 @@
-package com.brujuladelezo.app
+package com.brujuladelezo
 
 import android.os.Bundle
 import android.view.WindowManager

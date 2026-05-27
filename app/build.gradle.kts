@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.brujuladelezo.app"
+    namespace = "com.brujuladelezo"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.brujuladelezo.app"
+        applicationId = "com.brujuladelezo"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
