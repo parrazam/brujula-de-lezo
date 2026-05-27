@@ -47,7 +47,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.brujuladelezo.designsystem.components.CompassRose
-import com.brujuladelezo.designsystem.components.CruzDeBorgona
 import com.brujuladelezo.designsystem.components.LondonNeedle
 import com.brujuladelezo.domain.model.CompassAccuracy
 
@@ -84,12 +83,6 @@ fun CompassScreen(viewModel: CompassViewModel) {
             .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center,
     ) {
-        // Decorative background cross
-        CruzDeBorgona(
-            color = MaterialTheme.colorScheme.tertiary,
-            modifier = Modifier.fillMaxSize(),
-        )
-
         when {
             !uiState.hasCompassSensor -> NoSensorMessage()
             !uiState.hasLocationPermission -> PermissionMessage(
