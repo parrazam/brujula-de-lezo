@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Política de privacidad — Brújula de Lezo</title>
+  <meta name="description" content="Política de privacidad de Brújula de Lezo: una app Android que no recopila datos personales, no se conecta a internet y solo usa tu ubicación aproximada en el propio dispositivo." />
+  <meta name="theme-color" content="#F0E6D1" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0F1D2E" media="(prefers-color-scheme: dark)" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,300..900,30..100&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <header class="nav">
+    <a class="brand" href="/">
+      <span class="brand__mark" aria-hidden="true">
+        <svg viewBox="0 0 108 108" width="32" height="32">
+          <defs>
+            <linearGradient id="navbg" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#233d63" />
+              <stop offset="1" stop-color="#0f1d2e" />
+            </linearGradient>
+          </defs>
+          <rect width="108" height="108" rx="24" fill="url(#navbg)" />
+          <circle cx="54" cy="54" r="34" fill="none" stroke="#c2a25e" stroke-width="3.5" />
+          <polygon points="54,18 60,54 54,54" fill="#a02a23" />
+          <polygon points="54,18 48,54 54,54" fill="#8a221c" />
+          <polygon points="90,54 54,60 54,54" fill="#c2a25e" />
+          <polygon points="90,54 54,48 54,54" fill="#a98842" />
+          <polygon points="54,90 48,54 54,54" fill="#c2a25e" />
+          <polygon points="54,90 60,54 54,54" fill="#a98842" />
+          <polygon points="18,54 54,48 54,54" fill="#c2a25e" />
+          <polygon points="18,54 54,60 54,54" fill="#a98842" />
+          <circle cx="54" cy="54" r="5" fill="#0f1d2e" stroke="#c2a25e" stroke-width="2" />
+        </svg>
+      </span>
+      <span class="brand__name">Brújula de Lezo</span>
+    </a>
+    <nav class="nav__links">
+      <a href="/#features">Qué hace</a>
+      <a href="/#privacy">Privacidad</a>
+      <a href="https://github.com/parrazam/brujula-de-lezo" target="_blank" rel="noopener">Código</a>
+    </nav>
+    <button class="theme-toggle" type="button" aria-label="Cambiar tema" title="Cambiar tema">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="4"/>
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+      </svg>
+    </button>
+  </header>
+
+  <main class="legal">
+    <a class="legal__back" href="/">← Volver</a>
+
+    <span class="legal__meta">Última actualización · 27 de mayo de 2026</span>
+    <h1>Política de privacidad</h1>
+
+    <div class="legal__intro">
+      <p><strong>Resumen en una frase:</strong> Brújula de Lezo no recopila, no transmite ni almacena en ningún servidor información personal del usuario. Tu ubicación se usa únicamente en el propio dispositivo para calcular la dirección hacia Londres, y no se guarda ni sale del teléfono.</p>
+    </div>
+
+    <h2>1. Quién es el responsable</h2>
+    <p>El responsable del desarrollo y distribución de la aplicación <strong>Brújula de Lezo</strong> (en adelante, «la aplicación») es <strong>Víctor Parra</strong>, en adelante «el responsable» o «el desarrollador».</p>
+    <p>Para cualquier consulta relacionada con esta política de privacidad puede ponerse en contacto a través del correo electrónico: <a href="mailto:contacto@parravidales.es">contacto@parravidales.es</a>.</p>
+
+    <h2>2. Qué datos trata la aplicación</h2>
+    <p>La aplicación tiene una única función: mostrar la dirección hacia Londres desde la posición del usuario. Para ello utiliza, exclusivamente en el dispositivo y en tiempo real:</p>
+    <ul>
+      <li><strong>La ubicación aproximada</strong> del dispositivo, para calcular el rumbo geográfico hacia Londres.</li>
+      <li><strong>Los sensores de orientación</strong> (acelerómetro, magnetómetro o vector de rotación), para saber hacia dónde apunta el dispositivo.</li>
+    </ul>
+    <p>Estos datos se procesan <strong>en memoria, en el momento</strong>, para mover la aguja en pantalla. <strong>No se almacenan, no se registran y no se envían a ningún servidor ni a terceros.</strong> Al cerrar la aplicación, desaparecen. Las coordenadas de Londres están escritas de forma fija en el código de la aplicación.</p>
+
+    <h2>3. Conexiones de red</h2>
+    <p>La aplicación <strong>no solicita el permiso de acceso a internet</strong> en su archivo de manifiesto y, por tanto, no establece ninguna conexión de red. Esto incluye:</p>
+    <ul>
+      <li>No realiza llamadas a APIs ni a servicios web propios o de terceros.</li>
+      <li>No descarga datos en tiempo de ejecución. Todo lo que necesita (las coordenadas de Londres y el cálculo de la declinación magnética) está incorporado en la propia aplicación o lo proporciona el sistema operativo.</li>
+      <li>No incluye SDKs de analítica, publicidad, atribución, medición de errores ni cualquier otra forma de telemetría.</li>
+    </ul>
+
+    <h2>4. Permisos del sistema</h2>
+    <p>La aplicación solicita únicamente los permisos estrictamente necesarios para su funcionamiento:</p>
+    <ul>
+      <li><strong>Ubicación aproximada</strong> (<code>ACCESS_COARSE_LOCATION</code>): para conocer tu posición y calcular en qué dirección queda Londres. Se usa la ubicación de baja precisión, suficiente para orientar la aguja. La posición no se almacena ni se transmite; se utiliza en tiempo real y se descarta.</li>
+      <li><strong>Vibración</strong> (<code>VIBRATE</code>): para emitir una breve vibración cuando el dispositivo queda alineado con la dirección a Inglaterra. Es un permiso normal que no muestra diálogo ni accede a ningún dato.</li>
+    </ul>
+    <p>La aplicación <strong>no solicita</strong> permiso de internet, ni de ubicación precisa (<code>ACCESS_FINE_LOCATION</code>), ni de ubicación en segundo plano, ni acceso a contactos, cámara, micrófono, almacenamiento o cualquier otro dato personal.</p>
+
+    <h2>5. Servicios de terceros</h2>
+    <p>La aplicación <strong>no utiliza servicios de terceros</strong> que tengan acceso a datos del usuario. En particular, no se incluyen:</p>
+    <ul>
+      <li>Servicios de analítica (Google Analytics, Firebase Analytics, etc.).</li>
+      <li>Servicios de medición de fallos (Crashlytics, Sentry, etc.).</li>
+      <li>Plataformas de publicidad o atribución.</li>
+      <li>Sistemas de autenticación o cuentas de usuario.</li>
+      <li>Servicios de localización de terceros: la ubicación la proporciona el propio sistema operativo Android (<code>LocationManager</code>), sin Google Play Services ni proveedores externos.</li>
+    </ul>
+
+    <h2>6. Datos de niños</h2>
+    <p>La aplicación no está dirigida específicamente a menores de 13 años y no recopila intencionadamente datos de menores. Dado que la aplicación no recopila datos personales de ningún tipo, esta condición se cumple por diseño.</p>
+
+    <h2>7. Conservación y eliminación de datos</h2>
+    <p>La aplicación no conserva datos personales: ni la ubicación ni la orientación se guardan en ningún momento. La única información que persiste son las preferencias propias de la aplicación, almacenadas localmente en el dispositivo. Para eliminar todo basta con desinstalar la aplicación o usar la opción del sistema «Borrar datos» en sus ajustes.</p>
+
+    <h2>8. Derechos del usuario</h2>
+    <p>De acuerdo con el Reglamento (UE) 2016/679 (RGPD) y la Ley Orgánica 3/2018 (LOPDGDD), el usuario tiene derecho de acceso, rectificación, supresión, oposición, limitación del tratamiento y portabilidad respecto a sus datos personales.</p>
+    <p>Dado que el responsable <strong>no recibe ni almacena ningún dato personal del usuario</strong>, estos derechos se ejercen directamente sobre el dispositivo: el usuario tiene control total y exclusivo sobre los permisos concedidos, pudiendo revocarlos en cualquier momento desde los ajustes del sistema operativo.</p>
+    <p>Si así lo desea, el usuario puede presentar una reclamación ante la Agencia Española de Protección de Datos (<a href="https://www.aepd.es" target="_blank" rel="noopener">www.aepd.es</a>).</p>
+
+    <h2>9. Cambios en esta política</h2>
+    <p>Esta política puede actualizarse cuando se introduzcan nuevas funcionalidades en la aplicación o cuando lo exijan cambios legales. La fecha de la última actualización se indica al inicio del documento. Las versiones anteriores quedan registradas en el historial público del repositorio de código fuente del sitio web.</p>
+
+    <h2>10. Contacto</h2>
+    <p>Para cualquier duda, solicitud o reclamación relacionada con esta política, escriba a <a href="mailto:contacto@parravidales.es">contacto@parravidales.es</a>.</p>
+  </main>
+
+  <footer class="foot">
+    <div class="foot__inner">
+      <div>
+        <span class="brand brand--small"><span class="brand__name">Brújula de Lezo</span></span>
+        <p class="foot__copy">Hecho con cariño desde Zamora.</p>
+      </div>
+      <nav class="foot__links">
+        <a href="/">Inicio</a>
+        <a href="https://github.com/parrazam/brujula-de-lezo" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+    </div>
+    <div class="foot__line">
+      <span>© 2026 Víctor Parra</span>
+      <span class="mono">Política v1.0</span>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      var btn = document.querySelector('.theme-toggle');
+      if (!btn) return;
+      var root = document.documentElement;
+      btn.addEventListener('click', function () {
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var current = root.classList.contains('theme-dark') ? 'dark'
+                    : root.classList.contains('theme-light') ? 'light'
+                    : (prefersDark ? 'dark' : 'light');
+        var next = current === 'dark' ? 'light' : 'dark';
+        root.classList.remove('theme-light', 'theme-dark');
+        root.classList.add('theme-' + next);
+      });
+    })();
+  </script>
+</body>
+</html>

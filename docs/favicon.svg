@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#233d63"/>
+      <stop offset="1" stop-color="#0f1d2e"/>
+    </linearGradient>
+  </defs>
+  <rect width="108" height="108" rx="24" fill="url(#bg)"/>
+  <circle cx="54" cy="54" r="34" fill="none" stroke="#c2a25e" stroke-width="3.5"/>
+  <circle cx="54" cy="54" r="28" fill="none" stroke="#c2a25e" stroke-width="1" opacity="0.5"/>
+  <!-- Estrella de brújula: punta a Inglaterra (NNE) en borgoña, resto en oro -->
+  <g>
+    <polygon points="54,18 60,54 54,54" fill="#a02a23"/>
+    <polygon points="54,18 48,54 54,54" fill="#8a221c"/>
+    <polygon points="90,54 54,60 54,54" fill="#c2a25e"/>
+    <polygon points="90,54 54,48 54,54" fill="#a98842"/>
+    <polygon points="54,90 48,54 54,54" fill="#c2a25e"/>
+    <polygon points="54,90 60,54 54,54" fill="#a98842"/>
+    <polygon points="18,54 54,48 54,54" fill="#c2a25e"/>
+    <polygon points="18,54 54,60 54,54" fill="#a98842"/>
+  </g>
+  <circle cx="54" cy="54" r="5" fill="#0f1d2e" stroke="#c2a25e" stroke-width="2"/>
+</svg>

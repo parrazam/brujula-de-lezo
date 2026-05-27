@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Brújula de Lezo — La brújula que no apunta al norte. Apunta a Inglaterra.</title>
+  <meta name="description" content="Una brújula para Android que señala siempre a Londres, no al norte. Inspirada en Blas de Lezo. 100% offline: sin red, sin cuenta, sin telemetría." />
+  <meta name="theme-color" content="#F0E6D1" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0F1D2E" media="(prefers-color-scheme: dark)" />
+
+  <!-- OG -->
+  <meta property="og:title" content="Brújula de Lezo — Apunta a la pérfida Albión" />
+  <meta property="og:description" content="Una brújula Android que señala siempre a Inglaterra, no al norte. Sin red, sin cuenta, sin telemetría." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://brujuladelezo.cuzo.dev/" />
+  <meta property="og:image" content="https://brujuladelezo.cuzo.dev/icon.png" />
+
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,300..900,30..100&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ─── NAV ─────────────────────────────────────────────────────────────── -->
+  <header class="nav">
+    <a class="brand" href="/">
+      <span class="brand__mark" aria-hidden="true">
+        <svg viewBox="0 0 108 108" width="32" height="32">
+          <defs>
+            <linearGradient id="navbg" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#233d63" />
+              <stop offset="1" stop-color="#0f1d2e" />
+            </linearGradient>
+          </defs>
+          <rect width="108" height="108" rx="24" fill="url(#navbg)" />
+          <circle cx="54" cy="54" r="34" fill="none" stroke="#c2a25e" stroke-width="3.5" />
+          <polygon points="54,18 60,54 54,54" fill="#a02a23" />
+          <polygon points="54,18 48,54 54,54" fill="#8a221c" />
+          <polygon points="90,54 54,60 54,54" fill="#c2a25e" />
+          <polygon points="90,54 54,48 54,54" fill="#a98842" />
+          <polygon points="54,90 48,54 54,54" fill="#c2a25e" />
+          <polygon points="54,90 60,54 54,54" fill="#a98842" />
+          <polygon points="18,54 54,48 54,54" fill="#c2a25e" />
+          <polygon points="18,54 54,60 54,54" fill="#a98842" />
+          <circle cx="54" cy="54" r="5" fill="#0f1d2e" stroke="#c2a25e" stroke-width="2" />
+        </svg>
+      </span>
+      <span class="brand__name">Brújula de Lezo</span>
+    </a>
+    <nav class="nav__links">
+      <a href="#features">Qué hace</a>
+      <a href="#privacy">Privacidad</a>
+      <a href="https://github.com/parrazam/brujula-de-lezo" target="_blank" rel="noopener">Código</a>
+    </nav>
+    <button class="theme-toggle" type="button" aria-label="Cambiar tema" title="Cambiar tema">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="4"/>
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+      </svg>
+    </button>
+  </header>
+
+  <!-- ─── HERO ────────────────────────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero__grain" aria-hidden="true"></div>
+    <div class="hero__inner">
+      <div class="hero__copy">
+        <span class="eyebrow">Android · 100% offline</span>
+        <h1 class="hero__title">
+          No apunta al norte.
+          <span class="hero__title-accent">Apunta a Inglaterra.</span>
+        </h1>
+        <p class="hero__lead">
+          Una brújula que, gires como gires el móvil, señala siempre la dirección real
+          hacia Londres. Inspirada en la sentencia de Blas de Lezo: <em>«Todo buen español
+          deberá mear siempre mirando a Inglaterra»</em>. Sin red, sin cuenta, sin que tus datos salgan del teléfono.
+        </p>
+        <div class="hero__ctas">
+          <a class="btn-play" href="https://play.google.com/store/apps/details?id=com.brujuladelezo" target="_blank" rel="noopener" aria-label="Descargar Brújula de Lezo en Google Play">
+            <img src="google-play-badge.png" alt="Disponible en Google Play" />
+          </a>
+          <a class="btn btn--ghost" href="privacy.html">Política de privacidad</a>
+        </div>
+        <ul class="hero__chips">
+          <li><span class="dot"></span> Sin telemetría</li>
+          <li><span class="dot"></span> Sin red</li>
+          <li><span class="dot"></span> Sin cuenta</li>
+        </ul>
+      </div>
+
+      <!-- Mockup móvil — la pantalla real de la app, modo claro y oscuro -->
+      <div class="phones" aria-label="Capturas de la app">
+        <div class="phone phone--back" aria-hidden="true">
+          <div class="phone__screen">
+            <div class="screen screen--dark">
+              <div class="albion" style="visibility:hidden">·</div>
+              <div class="compass">
+                <img class="compass__face" src="compass_face.png" alt="" />
+                <img class="compass__needle" src="compass_needle.png" alt="" style="--needle: 28deg" />
+              </div>
+              <blockquote class="quote">
+                «Todo buen español deberá mear siempre mirando a Inglaterra»
+                <cite>— Blas de Lezo</cite>
+              </blockquote>
+            </div>
+          </div>
+        </div>
+
+        <div class="phone phone--front">
+          <div class="phone__notch" aria-hidden="true"></div>
+          <div class="phone__screen">
+            <div class="screen screen--light">
+              <div class="albion">¡Apuntando a la pérfida Albión!</div>
+              <div class="compass">
+                <img class="compass__face" src="compass_face.png" alt="Rosa de los vientos de la Brújula de Lezo" />
+                <img class="compass__needle" src="compass_needle.png" alt="Aguja apuntando a Londres" style="--needle: 0deg" />
+              </div>
+              <blockquote class="quote">
+                «Todo buen español deberá mear siempre mirando a Inglaterra»
+                <cite>— Blas de Lezo</cite>
+              </blockquote>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FEATURES ────────────────────────────────────────────────────────── -->
+  <section id="features" class="features">
+    <div class="section__head">
+      <span class="eyebrow eyebrow--dark">Qué hace</span>
+      <h2 class="section__title">Una sola obsesión:<br/>la pérfida Albión.</h2>
+      <p class="section__lead">No marca rumbos, no guarda rutas, no te dice dónde estás. Solo señala, con precisión geográfica, hacia dónde queda Inglaterra desde tu posición. Para lo que cada cual decida.</p>
+    </div>
+
+    <div class="features__grid">
+
+      <article class="card card--lg card--accent">
+        <div class="card__num">01</div>
+        <h3>Señala a Londres, no al norte</h3>
+        <p>La aguja ignora el norte magnético: apunta siempre a Londres (51,51 °N, 0,13 °O). Da igual cómo orientes el móvil — la dirección hacia Inglaterra se mantiene fija sobre el mundo real.</p>
+      </article>
+
+      <article class="card">
+        <div class="card__num">02</div>
+        <h3>Norte verdadero</h3>
+        <p>Aplica la declinación magnética de tu posición, así que el rumbo es geográficamente exacto y no el aproximado del norte magnético.</p>
+      </article>
+
+      <article class="card">
+        <div class="card__num">03</div>
+        <h3>Vibración al apuntar</h3>
+        <p>Cuando alineas el móvil con Inglaterra (±5°), una vibración te confirma que has dado en el blanco.</p>
+      </article>
+
+      <article class="card">
+        <div class="card__num">04</div>
+        <h3>Aviso de calibración</h3>
+        <p>Si el sensor pierde precisión, te avisa para que muevas el móvil en forma de ocho y la aguja vuelva a ser de fiar.</p>
+      </article>
+
+      <article class="card">
+        <div class="card__num">05</div>
+        <h3>Modo claro y oscuro</h3>
+        <p>Paleta del Siglo de Oro: azul marino imperial, oro viejo, rojo borgoña y blanco pergamino. Se adapta al tema de tu sistema.</p>
+      </article>
+
+      <article class="card card--lg">
+        <div class="card__num">06</div>
+        <h3>Mínimo imprescindible</h3>
+        <p>Las coordenadas de Londres van fijas en el código, así que la app no necesita internet. Solo pide tu ubicación aproximada para calcular el rumbo, y nada más sale de tu teléfono: ni telemetría, ni cuentas, ni anuncios.</p>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ─── PRIVACY MANIFESTO ───────────────────────────────────────────────── -->
+  <section id="privacy" class="manifesto">
+    <div class="manifesto__inner">
+      <span class="eyebrow eyebrow--light">Privacidad</span>
+      <h2 class="manifesto__title">Esta brújula no quiere saber nada de ti.</h2>
+      <div class="manifesto__grid">
+        <div>
+          <h3>Sin red</h3>
+          <p>La app ni siquiera pide permiso de internet. Vive entera en tu dispositivo.</p>
+        </div>
+        <div>
+          <h3>Sin telemetría</h3>
+          <p>No analytics, no crashlytics, no SDKs de medición. Cero rastreo.</p>
+        </div>
+        <div>
+          <h3>Permiso mínimo</h3>
+          <p>Solo tu ubicación aproximada, y únicamente para calcular el rumbo a Londres.</p>
+        </div>
+        <div>
+          <h3>Sin cuenta</h3>
+          <p>Ni email, ni login, ni «continuar con Google». Abres y apuntas.</p>
+        </div>
+      </div>
+      <a class="btn btn--light" href="privacy.html">Lee la política de privacidad completa →</a>
+    </div>
+  </section>
+
+  <!-- ─── FOOTER ──────────────────────────────────────────────────────────── -->
+  <footer class="foot">
+    <div class="foot__inner">
+      <div>
+        <span class="brand brand--small">
+          <span class="brand__name">Brújula de Lezo</span>
+        </span>
+        <p class="foot__copy">Hecho con cariño desde Zamora.</p>
+      </div>
+      <nav class="foot__links">
+        <a href="privacy.html">Privacidad</a>
+        <a href="https://github.com/parrazam/brujula-de-lezo" target="_blank" rel="noopener">GitHub</a>
+        <a href="#features">Qué hace</a>
+      </nav>
+    </div>
+    <div class="foot__line">
+      <span>© 2026 Víctor Parra</span>
+      <span class="mono" id="app-version">v1.0.0</span>
+    </div>
+  </footer>
+
+  <script>
+    // Versión: la traemos en vivo desde la última GitHub Release para que el
+    // footer se actualice solo con cada tag. Si falla la red, se queda el
+    // valor estático que ya está en el HTML.
+    (function () {
+      var el = document.getElementById('app-version');
+      if (!el || !window.fetch) return;
+      fetch('https://api.github.com/repos/parrazam/brujula-de-lezo/releases/latest', {
+        headers: { 'Accept': 'application/vnd.github+json' }
+      })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (data) {
+          if (data && typeof data.tag_name === 'string' && data.tag_name) {
+            el.textContent = data.tag_name;
+          }
+        })
+        .catch(function () { /* noop: nos quedamos con el fallback */ });
+    })();
+  </script>
+
+  <script>
+    // Toggle de tema. Sin almacenamiento: solo persiste en la pestaña activa.
+    // Si el usuario nunca pulsa, el tema lo decide prefers-color-scheme via CSS.
+    (function () {
+      var btn = document.querySelector('.theme-toggle');
+      if (!btn) return;
+      var root = document.documentElement;
+      btn.addEventListener('click', function () {
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var current = root.classList.contains('theme-dark') ? 'dark'
+                    : root.classList.contains('theme-light') ? 'light'
+                    : (prefersDark ? 'dark' : 'light');
+        var next = current === 'dark' ? 'light' : 'dark';
+        root.classList.remove('theme-light', 'theme-dark');
+        root.classList.add('theme-' + next);
+      });
+    })();
+  </script>
+</body>
+</html>
