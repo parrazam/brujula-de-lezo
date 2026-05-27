@@ -134,13 +134,8 @@ private fun CompassContent(uiState: CompassUiState) {
             modifier = Modifier.size(280.dp),
             contentAlignment = Alignment.Center,
         ) {
-            CompassRose(
-                primaryColor = MaterialTheme.colorScheme.primary,
-                secondaryColor = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.fillMaxSize(),
-            )
+            CompassRose(modifier = Modifier.fillMaxSize())
             LondonNeedle(
-                color = MaterialTheme.colorScheme.tertiary,
                 modifier = Modifier
                     .fillMaxSize()
                     .rotate(animatedRotation),
