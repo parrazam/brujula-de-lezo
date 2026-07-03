@@ -1,12 +1,14 @@
-# Brújula de Lezo
+<p align="center">
+  <img src="art/feature-graphic.png" alt="Brújula de Lezo — Para apuntar bien en tus asuntos" width="640">
+</p>
+
+[![Android CI](https://github.com/parrazam/brujula-de-lezo/actions/workflows/android.yml/badge.svg)](https://github.com/parrazam/brujula-de-lezo/actions/workflows/android.yml)
+[![Release](https://img.shields.io/github/v/release/parrazam/brujula-de-lezo?label=release)](https://github.com/parrazam/brujula-de-lezo/releases/latest)
 
 > «Todo buen español deberá mear siempre mirando a Inglaterra»
 > — *atribuido a Blas de Lezo*
 
 Una brújula para Android que no apunta al norte. Apunta siempre a Londres.
-
-[![Android CI](https://github.com/parrazam/brujula-de-lezo/actions/workflows/android.yml/badge.svg)](https://github.com/parrazam/brujula-de-lezo/actions/workflows/android.yml)
-[![Release](https://img.shields.io/github/v/release/parrazam/brujula-de-lezo?label=release)](https://github.com/parrazam/brujula-de-lezo/releases/latest)
 
 🌐 [brujuladelezo.cuzo.dev](https://brujuladelezo.cuzo.dev)
 
@@ -15,6 +17,14 @@ Una brújula para Android que no apunta al norte. Apunta siempre a Londres.
 ## Qué hace
 
 Gires como gires el móvil, la aguja señala la dirección real hacia Londres (51,51 °N, 0,13 °O). Aplica la declinación magnética de tu posición para que el rumbo sea geográficamente exacto, vibra cuando apuntas a Inglaterra (±5°) y avisa si el sensor de la brújula necesita calibración.
+
+## Capturas
+
+<p align="center">
+  <img src="art/screenshots-phone/01-brujula.png" alt="La brújula señalando el rumbo a Londres" width="260">
+  <img src="art/screenshots-phone/02-apuntando.png" alt="¡Apuntando a la pérfida Albión!" width="260">
+  <img src="art/screenshots-phone/03-brujula-oscuro.png" alt="Modo oscuro" width="260">
+</p>
 
 ## Tecnología
 
