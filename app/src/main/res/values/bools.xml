@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        En móvil la brújula se usa en vertical: bloqueamos el retrato para que no dé bandazos
+        al girar la muñeca. En sw600dp (values-sw600dp/) se deja libre, porque desde API 36
+        Android ignora la restricción de orientación en pantallas de ese tamaño.
+    -->
+    <bool name="lock_portrait_orientation">true</bool>
+</resources>
