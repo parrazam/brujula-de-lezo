@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **brujula-de-lezo** es una app Android nativa (Kotlin + Jetpack Compose) que funciona como brújula: en vez de señalar al norte, la aguja apunta siempre hacia Londres (51,5074°N, -0,1278°O), aplicando la declinación magnética real de la posición del usuario. Vibra cuando el usuario apunta a Inglaterra (±5°) y no depende de red ni de Google Play Services.
 
-`applicationId` / namespace raíz: `com.brujuladelezo`. `minSdk` 26, `compileSdk`/`targetSdk` 35, JVM target 17, Kotlin 2.1.0.
+`applicationId` / namespace raíz: `com.brujuladelezo`. `minSdk` 26, `compileSdk`/`targetSdk` 36, JVM target 21, Kotlin 2.2.21, AGP 8.13.2, Gradle 9.0.0.
 
 ## Comandos de desarrollo
 
@@ -59,7 +59,7 @@ design-system  → (sin dependencias internas) (Compose)
 |---|---|---|
 | `:core` | Tipos base compartidos | `DispatcherProvider`/`DefaultDispatcherProvider`, `AppError` (sealed interface) |
 | `:domain` | Modelos, contratos de repositorio, lógica de negocio pura | `GeoPoint`, `Landmarks.LONDON`, `LondonDirection`, `CompassAccuracy`, `RawOrientation`, `BearingCalculator`, `ObserveLondonDirectionUseCase`, interfaces `LocationRepository`/`OrientationRepository`/`GeomagneticRepository` |
-| `:data` | Implementaciones de repositorio sobre APIs de Android | `LocationRepositoryImpl` (`LocationManager`, sin Play Services), `OrientationRepositoryImpl` (`SensorManager` + `WindowManager`), `GeomagneticRepositoryImpl` (`GeomagneticField`) |
+| `:data` | Implementaciones de repositorio sobre APIs de Android | `LocationRepositoryImpl` (`LocationManager`, sin Play Services), `OrientationRepositoryImpl` (`SensorManager` + rotación del display inyectada), `GeomagneticRepositoryImpl` (`GeomagneticField`) |
 | `:presentation` | ViewModel y pantalla Compose | `CompassViewModel` (`StateFlow<CompassUiState>`), `CompassUiState`, `CompassScreen` |
 | `:design-system` | Componentes Compose reutilizables, tema | `CompassRose`, `LondonNeedle`, `CruzDeBorgona`, tema Material 3 |
 | `:app` | Entry point, DI manual | `MainActivity`, `BrujulaApplication`, `AppContainer` |
@@ -103,6 +103,24 @@ Todo esto se combina en `ObserveLondonDirectionUseCase.invoke()`, que hace `comb
 
 Los repositorios son *main-safe* vía `.flowOn(dispatchers.io)` internamente. No usar `GlobalScope`; usar `viewModelScope`. La abstracción `DispatcherProvider` (en `:core`) es la que se sustituye por un fake en tests.
 
+Ojo con las APIs de `LocationManager` que exigen `Looper` en el hilo llamante: los `callbackFlow` corren bajo `flowOn(dispatchers.io)`, que no lo tiene. Usar siempre las sobrecargas con `Executor` (`LocationManagerCompat`), y no envolver el registro en un `runCatching` mudo — así fue como pasó desapercibido durante meses que las actualizaciones de ubicación nunca llegaban a registrarse.
+
+## targetSdk 36 (Android 16)
+
+Play exige API 36 para publicar actualizaciones. Los dos cambios de comportamiento que afectan a esta app:
+
+- **Edge-to-edge obligatorio, sin opt-out** (`windowOptOutEdgeToEdgeEnforcement` ya no sirve). `MainActivity` llama a `enableEdgeToEdge()` sin parametrizar —su default decide el color de los iconos por `Configuration.uiMode`, la misma señal que usa `BrujulaDeLezoTheme`— y `CompassScreen` separa el fondo (pinta hasta los bordes) del contenido (`windowInsetsPadding(WindowInsets.safeDrawing)`). No se usa `Scaffold`: sin TopAppBar ni FAB, solo añadiría `PaddingValues` que propagar.
+- **Restricciones de orientación ignoradas en pantallas ≥600dp.** No hay `android:screenOrientation` en el manifest; el bloqueo es programático y gateado por `R.bool.lock_portrait_orientation` (`true` en `values/`, `false` en `values-sw600dp/` y en `src/debug/` para poder probar el apaisado en móvil). No se declara `PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY`, el opt-out disponible hasta API 37.
+
+**El layout no puede asumir vertical.** `CompassContent` usa `BoxWithConstraints` (no `LocalConfiguration.screenWidthDp`, lint `ConfigurationScreenWidthHeight`) y exige ancho ≥600dp **y** ventana apaisada para las dos columnas: con el ancho solo, una tablet en vertical deja media pantalla vacía. La rosa se dimensiona a partir del espacio disponible; `compass_face.png` es 1024×1024, así que hasta ~420dp no hay reescalado.
+
+**La rotación del display no se lee del `WindowManager`.** `WindowManager.getDefaultDisplay()` está deprecado y el `WindowManager` de `AppContainer` sale del Application context; la migración obvia (`Context.getDisplay()`) lanza `UnsupportedOperationException` sobre un contexto no visual. Se usa `DisplayManager.getDisplay(DEFAULT_DISPLAY)` (`app/di/DisplayRotation.kt`), inyectado en `OrientationRepositoryImpl` como `displayRotation: () -> Int` para que `:data` no dependa de nada de ventanas. El remapeo de ejes vive en `axesForRotation` con test propio: esas ramas eran código muerto mientras la app estaba bloqueada en retrato.
+
+**16 KB page size.** La app no trae `jniLibs` propias, pero el AAB incluye `libandroidx.graphics.path.so` (transitiva de Compose), ya alineada (`readelf -lW` reporta `align 0x4000` en todos los segmentos `LOAD`). Re-verificar tras subir Compose:
+`find app/build/intermediates/stripped_native_libs/release -name '*.so' -exec readelf -lW {} \;`
+
+`bundleRelease`/`assembleRelease` en local fallan al firmar: el keystore (`keystore/release.jks`) solo existe en CI, decodificado desde el secret. Los intermedios sí se generan y sirven para verificar las nativas.
+
 ## Privacidad
 
 - Sin acceso a internet: la app no pide permiso de red y no existe capa de red en el proyecto.
@@ -112,7 +130,9 @@ Los repositorios son *main-safe* vía `.flowOn(dispatchers.io)` internamente. No
 
 ## Tests
 
-Stack: **JUnit 4 + MockK 1.13.13 + Turbine 1.2.0 + `kotlinx-coroutines-test`**, con `MainDispatcherRule` (en `presentation/src/test`) usando `UnconfinedTestDispatcher`.
+Stack: **JUnit 4 + MockK 1.14.9 + Turbine 1.2.1 + `kotlinx-coroutines-test`**, con `MainDispatcherRule` (en `presentation/src/test`) usando `UnconfinedTestDispatcher`.
+
+`:data` solo tiene JUnit: su único test (`AxisRemapTest`) cubre lógica pura. Las constantes `Surface.ROTATION_*` y `SensorManager.AXIS_*` son `static final int` y kotlinc las inlinea, así que no hace falta Robolectric ni `unitTests.isReturnDefaultValues`.
 
 ## Skills instalados
 
