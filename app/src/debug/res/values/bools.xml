@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        Solo en debug: sin esto, en un móvil (< 600dp) el retrato queda bloqueado y no hay forma
+        de ejercitar el remapeo de ejes de ROTATION_90/270 sin una tablet.
+    -->
+    <bool name="lock_portrait_orientation">false</bool>
+</resources>

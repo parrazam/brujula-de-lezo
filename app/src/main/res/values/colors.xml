@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="ic_launcher_background">#1E3353</color>
+    <!-- BlancoPergamino del tema Compose: evita el flash del fondo del sistema al arrancar. -->
+    <color name="window_background">#F0E6D1</color>
 </resources>
