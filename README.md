@@ -16,7 +16,7 @@ Una brújula para Android que no apunta al norte. Apunta siempre a Londres.
 
 ## Qué hace
 
-Gires como gires el móvil, la aguja señala la dirección real hacia Londres (51,51 °N, 0,13 °O). Aplica la declinación magnética de tu posición para que el rumbo sea geográficamente exacto, vibra cuando apuntas a Inglaterra (±5°) y avisa si el sensor de la brújula necesita calibración.
+Gires como gires el móvil, la aguja señala la dirección real hacia Londres (51,51 °N, 0,13 °O). Aplica la declinación magnética de tu posición para que el rumbo sea geográficamente exacto, vibra cuando apuntas a Inglaterra (±5°) y avisa si el sensor de la brújula necesita calibración. En tablets y plegables rota libremente y reorganiza la pantalla en dos columnas.
 
 ## Capturas
 
@@ -30,14 +30,15 @@ Gires como gires el móvil, la aguja señala la dirección real hacia Londres (5
 
 | | |
 |---|---|
-| **Lenguaje** | Kotlin 2.1.0 |
-| **UI** | Jetpack Compose + Material 3 (Compose BOM 2024.12.01) |
+| **Lenguaje** | Kotlin 2.2.21 |
+| **UI** | Jetpack Compose + Material 3 (Compose BOM 2026.04.01) |
+| **Build** | AGP 8.13.2 + Gradle 9.0.0, JVM target 21 |
 | **Arquitectura** | Clean Architecture multi-módulo |
 | **DI** | Manual (`AppContainer`) |
 | **Sensores** | `TYPE_ROTATION_VECTOR` + `GeomagneticField` |
 | **Localización** | `LocationManager` (sin Google Play Services) |
 | **SDK mínimo** | API 26 (Android 8.0) |
-| **SDK objetivo** | API 35 (Android 15) |
+| **SDK objetivo** | API 36 (Android 16) |
 
 ## Arquitectura
 
@@ -71,7 +72,7 @@ design-system   ← Compose
 
 ## Desarrollo local
 
-Requiere **JDK 17** y **Android SDK con API 35**.
+Requiere **JDK 21** y **Android SDK con API 36**.
 
 ```bash
 # Compilar (variante debug)
@@ -92,9 +93,10 @@ Requiere **JDK 17** y **Android SDK con API 35**.
 ```bash
 ./gradlew :domain:test          # BearingCalculatorTest, ObserveLondonDirectionUseCaseTest
 ./gradlew :presentation:testDebugUnitTest   # CompassViewModelTest
+./gradlew :data:testDebugUnitTest           # AxisRemapTest
 ```
 
-Stack de test: **JUnit 4 + MockK 1.13.13 + Turbine 1.2.0 + `MainDispatcherRule`** con `UnconfinedTestDispatcher`.
+Stack de test: **JUnit 4 + MockK 1.14.9 + Turbine 1.2.1 + `MainDispatcherRule`** con `UnconfinedTestDispatcher`.
 
 ## CI/CD
 
