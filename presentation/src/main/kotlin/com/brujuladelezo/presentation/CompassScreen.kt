@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -160,8 +161,11 @@ private fun CompassContent(uiState: CompassUiState) {
             ) {
                 CompassDial(rotation = animatedRotation, size = dialSize)
                 Column(
+                    // Sin acotar, en una tablet de 1280dp el texto quedaría perdido en medio
+                    // de un vacío enorme y la rosa pegada al borde.
                     modifier = Modifier
-                        .weight(1f)
+                        .weight(1f, fill = false)
+                        .widthIn(max = 520.dp)
                         .verticalScroll(scrollState),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
@@ -173,8 +177,11 @@ private fun CompassContent(uiState: CompassUiState) {
             }
         } else {
             // Del alto se reserva hueco para el mensaje de apuntado, el banner, la cita y la firma.
+            // En tablet en vertical se deja crecer más: con el tope de móvil la rosa quedaba
+            // diminuta en medio de la pantalla.
+            val maxDial = if (maxWidth >= 600.dp) 420.dp else 320.dp
             val dialSize = minOf(maxWidth - ContentPadding * 2, maxHeight - 240.dp)
-                .coerceIn(160.dp, 320.dp)
+                .coerceIn(160.dp, maxDial)
             // Red de seguridad para apaisado de móvil y tamaños de fuente muy grandes.
             val needsScroll = maxHeight < 520.dp
 
