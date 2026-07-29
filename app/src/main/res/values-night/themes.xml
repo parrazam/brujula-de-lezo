@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Padre oscuro para que los diálogos del sistema (permiso de ubicación) sean coherentes. -->
+    <style name="Theme.BrujulaDeLezo" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/window_background</item>
+    </style>
+</resources>
