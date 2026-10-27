@@ -72,15 +72,15 @@ design-system  → (sin dependencias internas) (Compose)
 | Módulo | Responsabilidad | Clases clave |
 |---|---|---|
 | `:core` | Tipos base compartidos | `DispatcherProvider`/`DefaultDispatcherProvider`, `AppError` (sealed interface) |
-| `:domain` | Modelos, contratos de repositorio, lógica de negocio pura | `GeoPoint`, `Landmarks.LONDON`, `LondonDirection`, `CompassAccuracy`, `RawOrientation`, `BearingCalculator`, `ObserveLondonDirectionUseCase`, interfaces `LocationRepository`/`OrientationRepository`/`GeomagneticRepository` |
-| `:data` | Implementaciones de repositorio sobre APIs de Android | `LocationRepositoryImpl` (`LocationManager` con los proveedores fusionado de AOSP en API 31+, red y pasivo; sin Play Services), `OrientationRepositoryImpl` (`SensorManager` + rotación del display inyectada), `GeomagneticRepositoryImpl` (`GeomagneticField`) |
-| `:presentation` | ViewModel y pantalla Compose | `CompassViewModel` (`StateFlow<CompassUiState>`), `CompassUiState`, `CompassScreen` |
+| `:domain` | Modelos, contratos de repositorio, lógica de negocio pura | `GeoPoint`, `Landmarks.LONDON`, `LondonDirection`, `CardinalDirection`, `AppSettings`, `CompassAccuracy`, `RawOrientation`, `BearingCalculator`, `PointingHysteresis`, `ObserveLondonDirectionUseCase`, `ObserveLocationEnabledUseCase`, `Observe/UpdateSettingsUseCase`, interfaces `LocationRepository`/`OrientationRepository`/`GeomagneticRepository`/`SettingsRepository` |
+| `:data` | Implementaciones de repositorio sobre APIs de Android | `LocationRepositoryImpl` (`LocationManager` con los proveedores fusionado de AOSP en API 31+, red y pasivo; sin Play Services), `OrientationRepositoryImpl` (`SensorManager` + rotación del display inyectada), `GeomagneticRepositoryImpl` (`GeomagneticField`), `SettingsRepositoryImpl` (`SharedPreferences`) |
+| `:presentation` | ViewModels y pantalla Compose | `CompassViewModel` (`StateFlow<CompassUiState>`), `SettingsViewModel`, `CompassUiState`, `CompassScreen`, `SettingsSheet` |
 | `:design-system` | Componentes Compose reutilizables, tema | `CompassDial` (rosa + aguja + halo), `StatusPill`, `CompassRose`, `LondonNeedle`, `BrujulaDeLezoTheme`, `BrujulaTheme.colors` (`ExtendedColors`), tipografía |
 | `:app` | Entry point, DI manual | `MainActivity`, `BrujulaApplication`, `AppContainer` |
 
 ### Inyección de dependencias
 
-**No hay Koin ni Hilt.** El grafo de dependencias se construye a mano en `app/src/main/kotlin/com/brujuladelezo/di/AppContainer.kt`: instancia repositorios y el caso de uso, y expone un `ViewModelProvider.Factory` para `CompassViewModel`. Si se añade un nuevo repositorio o caso de uso, se cablea aquí.
+**No hay Koin ni Hilt.** El grafo de dependencias se construye a mano en `app/src/main/kotlin/com/brujuladelezo/di/AppContainer.kt`: instancia repositorios y casos de uso, y expone un `ViewModelProvider.Factory` para `CompassViewModel` y otro para `SettingsViewModel`. Si se añade un nuevo repositorio o caso de uso, se cablea aquí.
 
 ### La matemática del rumbo (lógica central, repartida entre módulos)
 
@@ -90,7 +90,7 @@ design-system  → (sin dependencias internas) (Compose)
 4. **Ángulo de la aguja**: `BearingCalculator.normalizeDegrees(rumbo − azimutVerdadero)`.
 5. **"Apuntando a Londres"**: con histéresis (`PointingHysteresis`): se entra cuando `|BearingCalculator.relativeAngle(rumbo, azimut)| < 5°` y no se sale hasta superar 8°. Con un solo umbral, el ruido del sensor cruzaba los 5° varias veces por segundo y cada cruce volvía a vibrar. El estado de la histéresis vive dentro del `flow {}` del caso de uso, uno por colector.
 
-Todo esto se combina en `ObserveLondonDirectionUseCase.invoke()`, que hace `combine()` de los flows de ubicación y orientación y emite un `LondonDirection` por cada actualización.
+Todo esto se combina en `ObserveLondonDirectionUseCase.invoke()`, que hace `combine()` de los flows de ubicación y orientación y emite un `LondonDirection` por cada actualización. Además del ángulo de la aguja lleva el rumbo verdadero (y su `CardinalDirection` de 16 puntos, con O de oeste), la distancia de círculo máximo (`BearingCalculator.distanceKm`, haversine) y `turnDegrees`, el giro con signo (positivo = a la derecha) que muestra la tarjeta. La declinación se aplica pero no se enseña al usuario: no ayuda a apuntar.
 
 ### Patrones clave
 
@@ -107,7 +107,7 @@ Todo esto se combina en `ObserveLondonDirectionUseCase.invoke()`, que hace `comb
 - No poner lógica de negocio en ViewModels — extraer a UseCases en `domain`
 - No crear dependencias circulares entre módulos
 - No nombrar recursos XML con nombres reservados de Android (`background`, `foreground`, `icon`, `logo`, `text`, `button`) — añadir prefijo descriptivo (p. ej. `app_background`, `ic_home`)
-- No añadir dependencias de red (Ktor, Retrofit) ni de persistencia (Room, SQLDelight, DataStore): la app es intencionadamente 100% offline y sin telemetría — ver "Privacidad" más abajo
+- No añadir dependencias de red (Ktor, Retrofit) ni de persistencia (Room, SQLDelight, DataStore): la app es intencionadamente 100% offline y sin telemetría — ver "Privacidad" más abajo. Los ajustes (tema, vibración, unidad de distancia) van en `SharedPreferences` del framework (`SettingsRepositoryImpl`, fichero `settings`); nada más se escribe en disco, y la ubicación nunca
 
 ### Corrutinas y threading
 
@@ -125,7 +125,7 @@ Ojo con las APIs de `LocationManager` que exigen `Looper` en el hilo llamante: l
 
 Play exige API 36 para publicar actualizaciones. Los dos cambios de comportamiento que afectan a esta app:
 
-- **Edge-to-edge obligatorio, sin opt-out** (`windowOptOutEdgeToEdgeEnforcement` ya no sirve). `MainActivity` llama a `enableEdgeToEdge()` sin parametrizar —su default decide el color de los iconos por `Configuration.uiMode`, la misma señal que usa `BrujulaDeLezoTheme`— y `CompassScreen` separa el fondo (pinta hasta los bordes) del contenido (`windowInsetsPadding(WindowInsets.safeDrawing)`). No se usa `Scaffold`: sin TopAppBar ni FAB, solo añadiría `PaddingValues` que propagar.
+- **Edge-to-edge obligatorio, sin opt-out** (`windowOptOutEdgeToEdgeEnforcement` ya no sirve). `MainActivity` llama a `enableEdgeToEdge()` en `onCreate` y lo repite con `SystemBarStyle.auto { darkTheme }` cada vez que cambia el tema resuelto: con el tema forzado desde Ajustes, el default (que mira `Configuration.uiMode`) pintaría iconos oscuros sobre fondo oscuro. Hasta la primera lectura de ajustes `MainActivity` no compone nada (se ve el `windowBackground`) para no mostrar un fotograma en el tema equivocado. y `CompassScreen` separa el fondo (pinta hasta los bordes) del contenido (`windowInsetsPadding(WindowInsets.safeDrawing)`). No se usa `Scaffold`: sin TopAppBar ni FAB, solo añadiría `PaddingValues` que propagar.
 - **Restricciones de orientación ignoradas en pantallas ≥600dp.** No hay `android:screenOrientation` en el manifest; el bloqueo es programático y gateado por `R.bool.lock_portrait_orientation` (`true` en `values/`, `false` en `values-sw600dp/` y en `src/debug/` para poder probar el apaisado en móvil). No se declara `PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY`, el opt-out disponible hasta API 37.
 
 **El layout no puede asumir vertical.** `CompassContent` usa `BoxWithConstraints` (no `LocalConfiguration.screenWidthDp`, lint `ConfigurationScreenWidthHeight`) y exige ancho ≥600dp **y** ventana apaisada para las dos columnas: con el ancho solo, una tablet en vertical deja media pantalla vacía. `compass_face.png` es 1024×1024, así que hasta ~420dp no hay reescalado (`MaxDialSize` = 448dp incluye el hueco del halo).

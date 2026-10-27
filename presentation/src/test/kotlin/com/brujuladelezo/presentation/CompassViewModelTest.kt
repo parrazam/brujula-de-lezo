@@ -2,6 +2,7 @@ package com.brujuladelezo.presentation
 
 import app.cash.turbine.test
 import com.brujuladelezo.core.DispatcherProvider
+import com.brujuladelezo.domain.model.CardinalDirection
 import com.brujuladelezo.domain.model.CompassAccuracy
 import com.brujuladelezo.domain.model.LondonDirection
 import com.brujuladelezo.domain.usecase.ObserveLocationEnabledUseCase
@@ -45,7 +46,14 @@ class CompassViewModelTest {
     private fun buildViewModel(hasCompassSensor: Boolean = true) =
         CompassViewModel(directionUseCase, locationEnabledUseCase, testDispatchers, hasCompassSensor)
 
-    private val direction = LondonDirection(42f, false, CompassAccuracy.ALTA)
+    private val direction = LondonDirection(
+        arrowRotationDegrees = 42f,
+        isPointingAtLondon = false,
+        accuracy = CompassAccuracy.ALTA,
+        bearingDegrees = 11.4f,
+        distanceKm = 1264.0,
+        turnDegrees = -30f,
+    )
 
     @Test
     fun `initial state has no permission and is not loading`() {
@@ -76,6 +84,10 @@ class CompassViewModelTest {
             assertTrue(last.hasLocationPermission)
             assertFalse(last.isLoading)
             assertEquals(42f, last.arrowRotation)
+            assertEquals(11.4f, last.bearingDegrees)
+            assertEquals(CardinalDirection.NNE, last.cardinal)
+            assertEquals(1264.0, last.distanceKm, 0.0)
+            assertEquals(-30f, last.turnDegrees)
             cancelAndIgnoreRemainingEvents()
         }
     }

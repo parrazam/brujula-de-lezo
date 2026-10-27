@@ -9,9 +9,13 @@ import com.brujuladelezo.core.DispatcherProvider
 import com.brujuladelezo.data.repository.GeomagneticRepositoryImpl
 import com.brujuladelezo.data.repository.LocationRepositoryImpl
 import com.brujuladelezo.data.repository.OrientationRepositoryImpl
+import com.brujuladelezo.data.repository.SettingsRepositoryImpl
 import com.brujuladelezo.domain.usecase.ObserveLocationEnabledUseCase
 import com.brujuladelezo.domain.usecase.ObserveLondonDirectionUseCase
+import com.brujuladelezo.domain.usecase.ObserveSettingsUseCase
+import com.brujuladelezo.domain.usecase.UpdateSettingsUseCase
 import com.brujuladelezo.presentation.CompassViewModel
+import com.brujuladelezo.presentation.SettingsViewModel
 
 class AppContainer(context: Context) {
 
@@ -38,6 +42,8 @@ class AppContainer(context: Context) {
     )
     private val observeLocationEnabled = ObserveLocationEnabledUseCase(locationRepository)
 
+    private val settingsRepository = SettingsRepositoryImpl(context, dispatchers)
+
     val compassViewModelFactory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T =
@@ -46,6 +52,15 @@ class AppContainer(context: Context) {
                 observeLocationEnabled = observeLocationEnabled,
                 dispatchers = dispatchers,
                 hasCompassSensor = hasCompassSensor,
+            ) as T
+    }
+
+    val settingsViewModelFactory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: Class<T>): T =
+            SettingsViewModel(
+                observeSettings = ObserveSettingsUseCase(settingsRepository),
+                updateSettings = UpdateSettingsUseCase(settingsRepository),
             ) as T
     }
 }

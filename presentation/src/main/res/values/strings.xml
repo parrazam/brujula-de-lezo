@@ -25,5 +25,33 @@
     <string name="tracking_failed_body">Los sensores dejaron de responder. Prueba otra vez; si se repite, reinicia la app.</string>
     <string name="tracking_failed_action">Reintentar</string>
 
+    <string name="card_label">Londres está a</string>
+    <string name="card_bearing_label">rumbo</string>
+    <string name="card_bearing_value">%1$d° %2$s</string>
+    <string name="card_turn_label">gira</string>
+    <string name="card_turn_right">%1$d° a la derecha</string>
+    <string name="card_turn_left">%1$d° a la izquierda</string>
+    <string name="unit_km_short">km</string>
+    <string name="unit_nmi_short">mn</string>
+
+    <string name="settings_open">Ajustes</string>
+    <string name="settings_title">Ajustes</string>
+    <string name="settings_theme">Tema</string>
+    <string name="settings_theme_system">Sistema</string>
+    <string name="settings_theme_light">Claro</string>
+    <string name="settings_theme_dark">Oscuro</string>
+    <string name="settings_distance">Distancia en</string>
+    <string name="settings_distance_km">Kilómetros</string>
+    <string name="settings_distance_nmi">Millas náuticas</string>
+    <string name="settings_vibration">Vibrar al apuntar</string>
+    <string name="settings_vibration_hint">Un toque al entrar en ±5°</string>
+    <string name="settings_privacy">Política de privacidad</string>
+    <string name="settings_licenses">Licencias</string>
+    <string name="settings_version">Versión</string>
+    <string name="settings_privacy_url" translatable="false">https://brujuladelezo.cuzo.dev/privacy.html</string>
+    <string name="licenses_title">Licencias</string>
+    <string name="licenses_body">Fraunces, © The Fraunces Project Authors, e IBM Plex Sans, © IBM Corp., se distribuyen con la licencia SIL Open Font License 1.1. Los textos completos están en la carpeta licenses/ del código fuente.</string>
+    <string name="licenses_close">Cerrar</string>
+
     <string name="no_compass_sensor">Tu dispositivo no tiene brújula.</string>
 </resources>

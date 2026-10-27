@@ -79,6 +79,10 @@ class CompassViewModel(
                     arrowRotation = state.direction.arrowRotationDegrees,
                     isPointingAtLondon = state.direction.isPointingAtLondon,
                     accuracy = state.direction.accuracy,
+                    bearingDegrees = state.direction.bearingDegrees,
+                    cardinal = state.direction.cardinal,
+                    distanceKm = state.direction.distanceKm,
+                    turnDegrees = state.direction.turnDegrees,
                 )
             }
         }
