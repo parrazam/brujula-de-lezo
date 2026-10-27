@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:locale="es">
+    <string name="compass_title">Brújula de Lezo</string>
     <string name="compass_pointing">¡Apuntando a la pérfida Albión!</string>
     <string name="compass_quote">«Todo buen español deberá mear siempre mirando a Inglaterra»</string>
     <string name="compass_quote_author">— Blas de Lezo</string>
-    <string name="compass_calibration">⚠ Brújula sin calibrar — mueve el móvil en forma de 8</string>
+    <string name="compass_calibration">Sin calibrar: mueve el móvil en forma de 8</string>
+    <string name="compass_accuracy_high">Precisión alta</string>
+    <string name="compass_accuracy_medium">Precisión media</string>
+    <string name="compass_a11y_pointing">Apuntando a Londres</string>
+    <string name="compass_a11y_right">Londres está %1$d grados a tu derecha</string>
+    <string name="compass_a11y_left">Londres está %1$d grados a tu izquierda</string>
     <string name="compass_locating">Buscando tu posición…</string>
 
     <string name="permission_rationale">Para apuntar a Londres necesitamos conocer tu ubicación aproximada.</string>

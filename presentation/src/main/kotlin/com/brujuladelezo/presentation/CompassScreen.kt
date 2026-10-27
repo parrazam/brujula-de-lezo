@@ -1,23 +1,20 @@
 package com.brujuladelezo.presentation
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import androidx.activity.compose.LocalActivity
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.res.stringResource
-import androidx.core.content.ContextCompat
-import androidx.lifecycle.compose.LifecycleResumeEffect
+import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
 import android.provider.Settings
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -39,8 +36,6 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -50,25 +45,45 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.graphicsLayer
-import android.annotation.SuppressLint
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.brujuladelezo.designsystem.components.CompassRose
-import com.brujuladelezo.designsystem.components.LondonNeedle
+import com.brujuladelezo.designsystem.components.CompassDial
+import com.brujuladelezo.designsystem.components.StatusPill
 import com.brujuladelezo.designsystem.theme.BrujulaDeLezoTheme
+import com.brujuladelezo.designsystem.theme.BrujulaTheme
+import com.brujuladelezo.designsystem.theme.QuoteTextStyle
+import com.brujuladelezo.domain.math.BearingCalculator
 import com.brujuladelezo.domain.model.CompassAccuracy
+import kotlin.math.abs
 
 private val ContentPadding = 24.dp
 private val WideGap = 32.dp
+
+/** compass_face.png es 1024×1024: hasta ~420dp (más el hueco del halo) no se reescala. */
+private val MaxDialSize = 448.dp
+private val MinDialSize = 200.dp
+private val TallGap = 12.dp
 
 private const val LOCATION_PERMISSION = Manifest.permission.ACCESS_COARSE_LOCATION
 
@@ -159,11 +174,234 @@ fun CompassScreen(viewModel: CompassViewModel) {
 }
 
 @Composable
-private fun CompassContent(uiState: CompassUiState) {
-    var accumulatedRotation by remember { mutableFloatStateOf(uiState.arrowRotation) }
+internal fun CompassContent(uiState: CompassUiState) {
+    val needleRotation = rememberNeedleRotation(uiState.arrowRotation)
+    val status = uiState.status()
 
-    LaunchedEffect(uiState.arrowRotation) {
-        val delta = shortestAngleDiff(uiState.arrowRotation, accumulatedRotation % 360f)
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        // Desde targetSdk 36 la app puede acabar en apaisado o en multiventana en cualquier
+        // pantalla de 600dp o más. Se exige además que la ventana sea apaisada: en una tablet
+        // en vertical las dos columnas quedarían estrechas y con media pantalla vacía.
+        val isWide = maxWidth >= 600.dp && maxWidth > maxHeight
+        if (isWide) {
+            WideLayout(uiState, needleRotation, status, maxWidth, maxHeight)
+        } else {
+            TallLayout(uiState, needleRotation, status, viewportHeight = maxHeight)
+        }
+    }
+}
+
+/**
+ * Cabecera, hueco de estado y cita miden lo que miden; la rosa se queda con el resto, así que no
+ * puede invadir ni la pastilla de "apuntando" ni la cita (era lo que pasaba con una rosa de
+ * tamaño fijo y el mensaje apareciendo encima). Si lo que queda no llega a [MinDialSize] (letra
+ * muy grande en una pantalla baja), la rosa se queda en ese mínimo, todo se apila y la pantalla
+ * se desplaza en vez de encoger la rosa hasta hacerla inútil.
+ */
+@Composable
+private fun TallLayout(
+    uiState: CompassUiState,
+    needleRotation: Float,
+    status: CompassStatus,
+    viewportHeight: Dp,
+) {
+    val verticalPadding = 16.dp
+    Layout(
+        content = {
+            Header()
+            StatusSlot(status)
+            Dial(uiState, needleRotation, Modifier.fillMaxSize())
+            Quote()
+        },
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = ContentPadding, vertical = verticalPadding),
+    ) { measurables, constraints ->
+        val gap = TallGap.roundToPx()
+        val width = constraints.maxWidth
+        val loose = Constraints(maxWidth = width)
+        val header = measurables[0].measure(loose)
+        val slot = measurables[1].measure(loose)
+        val quote = measurables[3].measure(loose)
+
+        // verticalScroll da alto infinito: el disponible es el de la ventana menos el padding.
+        val available = (viewportHeight - verticalPadding * 2).roundToPx()
+        val fixed = header.height + slot.height + quote.height + gap * 3
+        val dialSide = minOf(width, available - fixed, MaxDialSize.roundToPx())
+            .coerceAtLeast(minOf(width, MinDialSize.roundToPx()))
+        val dial = measurables[2].measure(Constraints.fixed(dialSide, dialSide))
+
+        val height = maxOf(available, fixed + dialSide)
+        layout(width, height) {
+            var y = 0
+            header.placeRelative(0, y)
+            y += header.height + gap
+            slot.placeRelative((width - slot.width) / 2, y)
+            y += slot.height + gap
+            // La rosa, centrada en el hueco entre el estado y la cita.
+            val dialSpace = height - y - quote.height - gap
+            dial.placeRelative((width - dialSide) / 2, y + (dialSpace - dialSide) / 2)
+            quote.placeRelative((width - quote.width) / 2, height - quote.height)
+        }
+    }
+}
+
+@Composable
+private fun WideLayout(
+    uiState: CompassUiState,
+    needleRotation: Float,
+    status: CompassStatus,
+    maxWidth: Dp,
+    maxHeight: Dp,
+) {
+    // Mitad del ancho útil (sin el padding ni el hueco entre columnas), o el alto útil.
+    val dialSize = minOf((maxWidth - ContentPadding * 2 - WideGap) / 2, maxHeight - ContentPadding * 2)
+        .coerceIn(200.dp, MaxDialSize)
+
+    Row(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(ContentPadding),
+        horizontalArrangement = Arrangement.spacedBy(WideGap, Alignment.CenterHorizontally),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Dial(uiState, needleRotation, Modifier.size(dialSize))
+        Column(
+            // Sin acotar, en una tablet de 1280dp el texto quedaría perdido en medio
+            // de un vacío enorme y la rosa pegada al borde.
+            modifier = Modifier
+                .weight(1f, fill = false)
+                .widthIn(max = 480.dp)
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Header(centered = true)
+            StatusSlot(status)
+            Quote()
+        }
+    }
+}
+
+@Composable
+private fun Header(centered: Boolean = false) {
+    Text(
+        text = stringResource(R.string.compass_title),
+        style = MaterialTheme.typography.titleLarge,
+        color = MaterialTheme.colorScheme.primary,
+        textAlign = if (centered) TextAlign.Center else TextAlign.Start,
+        modifier = Modifier
+            .fillMaxWidth()
+            .semantics { heading() },
+    )
+}
+
+/** Lo que dice el hueco de estado; solo uno a la vez, por orden de importancia. */
+internal enum class CompassStatus { POINTING, CALIBRATE, ACCURACY_HIGH, ACCURACY_MEDIUM }
+
+internal fun CompassUiState.status(): CompassStatus = when {
+    isPointingAtLondon -> CompassStatus.POINTING
+    accuracy == CompassAccuracy.BAJA || accuracy == CompassAccuracy.NO_FIABLE -> CompassStatus.CALIBRATE
+    accuracy == CompassAccuracy.ALTA -> CompassStatus.ACCURACY_HIGH
+    else -> CompassStatus.ACCURACY_MEDIUM
+}
+
+/**
+ * Las cuatro pastillas están siempre compuestas, una encima de otra, y solo se ve la activa: el
+ * hueco mide lo que la más alta y no cambia de tamaño al pasar de una a otra, así que nada de
+ * alrededor se desplaza al empezar o dejar de apuntar.
+ */
+@Composable
+private fun StatusSlot(status: CompassStatus) {
+    val colors = BrujulaTheme.colors
+    Box(
+        modifier = Modifier.fillMaxWidth(),
+        contentAlignment = Alignment.Center,
+    ) {
+        SlotPill(
+            visible = status == CompassStatus.ACCURACY_HIGH,
+            text = stringResource(R.string.compass_accuracy_high),
+            container = colors.okContainer,
+            content = colors.onOkContainer,
+        )
+        SlotPill(
+            visible = status == CompassStatus.ACCURACY_MEDIUM,
+            text = stringResource(R.string.compass_accuracy_medium),
+            container = colors.neutralContainer,
+            content = colors.onNeutralContainer,
+        )
+        SlotPill(
+            visible = status == CompassStatus.CALIBRATE,
+            text = stringResource(R.string.compass_calibration),
+            container = colors.warnContainer,
+            content = colors.onWarnContainer,
+        )
+        SlotPill(
+            visible = status == CompassStatus.POINTING,
+            text = stringResource(R.string.compass_pointing),
+            container = colors.pointing,
+            content = colors.onPointing,
+            showDot = false,
+        )
+    }
+}
+
+@Composable
+private fun SlotPill(visible: Boolean, text: String, container: Color, content: Color, showDot: Boolean = true) {
+    val alpha by animateFloatAsState(if (visible) 1f else 0f, tween(200), label = "status_pill")
+    StatusPill(
+        text = text,
+        containerColor = container,
+        contentColor = content,
+        showDot = showDot,
+        modifier = Modifier
+            .alpha(alpha)
+            .then(
+                if (visible) Modifier.semantics { liveRegion = LiveRegionMode.Polite }
+                else Modifier.clearAndSetSemantics { }
+            ),
+    )
+}
+
+@Composable
+private fun Dial(uiState: CompassUiState, needleRotation: Float, modifier: Modifier) {
+    val description = dialDescription(uiState)
+    CompassDial(
+        needleRotation = needleRotation,
+        pointing = uiState.isPointingAtLondon,
+        haloColor = BrujulaTheme.colors.pointing,
+        ringGapColor = MaterialTheme.colorScheme.background,
+        modifier = modifier.semantics {
+            contentDescription = description
+            liveRegion = LiveRegionMode.Polite
+        },
+    )
+}
+
+/**
+ * Lo que anuncia TalkBack. En pasos de 10° para no leer un número nuevo con cada temblor del
+ * sensor, que con `liveRegion` lo convertiría en un parloteo continuo.
+ */
+@Composable
+private fun dialDescription(uiState: CompassUiState): String {
+    if (uiState.isPointingAtLondon) return stringResource(R.string.compass_a11y_pointing)
+    val relative = BearingCalculator.relativeAngle(uiState.arrowRotation, 0f)
+    val degrees = (((abs(relative) + 5f) / 10f).toInt() * 10).coerceIn(10, 180)
+    return if (relative >= 0f) {
+        stringResource(R.string.compass_a11y_right, degrees)
+    } else {
+        stringResource(R.string.compass_a11y_left, degrees)
+    }
+}
+
+/** Acumula los giros para que la animación tome el camino corto al cruzar 0°/360°. */
+@Composable
+private fun rememberNeedleRotation(target: Float): Float {
+    var accumulatedRotation by remember { mutableFloatStateOf(target) }
+
+    LaunchedEffect(target) {
+        val delta = shortestAngleDiff(target, accumulatedRotation % 360f)
         accumulatedRotation += delta
     }
 
@@ -172,146 +410,25 @@ private fun CompassContent(uiState: CompassUiState) {
         animationSpec = tween(durationMillis = 300),
         label = "needle_rotation",
     )
-
-    val needsCalibration = uiState.accuracy == CompassAccuracy.BAJA ||
-        uiState.accuracy == CompassAccuracy.NO_FIABLE
-
-    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-        // Desde targetSdk 36 la app puede acabar en apaisado o en multiventana en cualquier
-        // pantalla de 600dp o más. Se exige además que la ventana sea apaisada: en una tablet
-        // en vertical las dos columnas quedarían estrechas y con media pantalla vacía.
-        val isWide = maxWidth >= 600.dp && maxWidth > maxHeight
-        val scrollState = rememberScrollState()
-
-        if (isWide) {
-            // Mitad del ancho útil (sin el padding ni el hueco entre columnas), o el alto útil.
-            val dialSize = minOf((maxWidth - ContentPadding * 2 - WideGap) / 2, maxHeight - ContentPadding * 2)
-                .times(0.9f)
-                .coerceIn(200.dp, 420.dp)
-
-            Row(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(ContentPadding),
-                horizontalArrangement = Arrangement.spacedBy(WideGap, Alignment.CenterHorizontally),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                CompassDial(rotation = animatedRotation, size = dialSize)
-                Column(
-                    // Sin acotar, en una tablet de 1280dp el texto quedaría perdido en medio
-                    // de un vacío enorme y la rosa pegada al borde.
-                    modifier = Modifier
-                        .weight(1f, fill = false)
-                        .widthIn(max = 520.dp)
-                        .verticalScroll(scrollState),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    PointingMessage(visible = uiState.isPointingAtLondon)
-                    CalibrationBanner(visible = needsCalibration)
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Quote()
-                }
-            }
-        } else {
-            // Del alto se reserva hueco para el mensaje de apuntado, el banner, la cita y la firma.
-            // En tablet en vertical se deja crecer más: con el tope de móvil la rosa quedaba
-            // diminuta en medio de la pantalla.
-            val maxDial = if (maxWidth >= 600.dp) 420.dp else 320.dp
-            val dialSize = minOf(maxWidth - ContentPadding * 2, maxHeight - 240.dp)
-                .coerceIn(160.dp, maxDial)
-            // Red de seguridad para apaisado de móvil y tamaños de fuente muy grandes.
-            val needsScroll = maxHeight < 520.dp
-
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = if (needsScroll) Arrangement.Top else Arrangement.Center,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .then(if (needsScroll) Modifier.verticalScroll(scrollState) else Modifier)
-                    .padding(ContentPadding),
-            ) {
-                PointingMessage(visible = uiState.isPointingAtLondon)
-                CalibrationBanner(visible = needsCalibration)
-
-                Spacer(modifier = Modifier.height(16.dp))
-                CompassDial(rotation = animatedRotation, size = dialSize)
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Quote()
-            }
-        }
-    }
-}
-
-/** Rosa de los vientos con la aguja superpuesta. */
-@Composable
-private fun CompassDial(rotation: Float, size: Dp) {
-    Box(
-        modifier = Modifier.size(size),
-        contentAlignment = Alignment.Center,
-    ) {
-        CompassRose(modifier = Modifier.fillMaxSize())
-        LondonNeedle(
-            modifier = Modifier
-                .fillMaxSize()
-                .rotate(rotation),
-        )
-    }
-}
-
-@Composable
-private fun PointingMessage(visible: Boolean) {
-    AnimatedVisibility(visible = visible) {
-        Text(
-            text = stringResource(R.string.compass_pointing),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.tertiary,
-            textAlign = TextAlign.Center,
-        )
-    }
+    return animatedRotation
 }
 
 @Composable
 private fun Quote() {
-    Text(
-        text = stringResource(R.string.compass_quote),
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
-        textAlign = TextAlign.Center,
-        modifier = Modifier.padding(horizontal = 16.dp),
-    )
-    Spacer(modifier = Modifier.height(4.dp))
-    Text(
-        text = stringResource(R.string.compass_quote_author),
-        style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
-        textAlign = TextAlign.Center,
-    )
-}
-
-@Composable
-private fun CalibrationBanner(visible: Boolean) {
-    AnimatedVisibility(visible = visible) {
-        CalibrationCard()
-    }
-}
-
-@Composable
-private fun CalibrationCard() {
-    Card(
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f),
-        ),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-    ) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
-            text = stringResource(R.string.compass_calibration),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.tertiary,
+            text = stringResource(R.string.compass_quote),
+            style = QuoteTextStyle,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier.padding(horizontal = 16.dp),
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = stringResource(R.string.compass_quote_author),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+            textAlign = TextAlign.Center,
         )
     }
 }
@@ -409,27 +526,48 @@ private fun vibrateDevice(context: Context) {
 
 // --- Previews: los tamaños cubren los casos que Android 16 puede imponer a la app ---
 
-private val previewState = CompassUiState(
-    arrowRotation = 42f,
+private val previewPointing = CompassUiState(
+    arrowRotation = 2f,
     isPointingAtLondon = true,
-    accuracy = CompassAccuracy.BAJA,
+    accuracy = CompassAccuracy.ALTA,
     hasLocationPermission = true,
 )
 
+private val previewCalibrating = previewPointing.copy(
+    arrowRotation = 300f,
+    isPointingAtLondon = false,
+    accuracy = CompassAccuracy.BAJA,
+)
+
 @Preview(name = "Móvil vertical", widthDp = 360, heightDp = 800)
+@Preview(name = "Móvil pequeño", widthDp = 320, heightDp = 568)
 @Preview(name = "Móvil apaisado", widthDp = 800, heightDp = 360)
 @Preview(name = "Tablet apaisada", widthDp = 1280, heightDp = 800)
 @Preview(name = "Tablet vertical", widthDp = 800, heightDp = 1280)
 @Preview(name = "Fuente x2", widthDp = 360, heightDp = 800, fontScale = 2f)
+@Preview(name = "Fuente x2 pequeño", widthDp = 320, heightDp = 568, fontScale = 2f)
+@Preview(name = "Oscuro", widthDp = 360, heightDp = 800, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-private fun CompassContentPreview() {
+private fun CompassPointingPreview() {
+    CompassPreview(previewPointing)
+}
+
+@Preview(name = "Calibrando", widthDp = 360, heightDp = 800)
+@Preview(name = "Calibrando, pequeño", widthDp = 320, heightDp = 568)
+@Composable
+private fun CompassCalibratingPreview() {
+    CompassPreview(previewCalibrating)
+}
+
+@Composable
+private fun CompassPreview(state: CompassUiState) {
     BrujulaDeLezoTheme {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background),
         ) {
-            CompassContent(uiState = previewState)
+            CompassContent(uiState = state)
         }
     }
 }
