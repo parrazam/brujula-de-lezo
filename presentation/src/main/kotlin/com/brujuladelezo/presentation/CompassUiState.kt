@@ -7,6 +7,16 @@ data class CompassUiState(
     val isPointingAtLondon: Boolean = false,
     val accuracy: CompassAccuracy = CompassAccuracy.BAJA,
     val hasLocationPermission: Boolean = false,
+    /** Con permiso, todavía sin el primer rumbo. */
     val isLoading: Boolean = false,
     val hasCompassSensor: Boolean = true,
-)
+    val isLocationEnabled: Boolean = true,
+    /** El flujo de sensores falló; la aguja no es fiable y no se muestra. */
+    val trackingFailed: Boolean = false,
+) {
+    /**
+     * Sin ubicación del sistema solo bloquea mientras no haya un primer rumbo: si se apaga
+     * después, la última posición sigue sirviendo (Londres no se mueve y tú, poco).
+     */
+    val showLocationDisabled: Boolean get() = isLoading && !isLocationEnabled
+}

@@ -9,6 +9,7 @@ import com.brujuladelezo.core.DispatcherProvider
 import com.brujuladelezo.data.repository.GeomagneticRepositoryImpl
 import com.brujuladelezo.data.repository.LocationRepositoryImpl
 import com.brujuladelezo.data.repository.OrientationRepositoryImpl
+import com.brujuladelezo.domain.usecase.ObserveLocationEnabledUseCase
 import com.brujuladelezo.domain.usecase.ObserveLondonDirectionUseCase
 import com.brujuladelezo.presentation.CompassViewModel
 
@@ -35,12 +36,14 @@ class AppContainer(context: Context) {
         orientationRepository = orientationRepository,
         geomagneticRepository = geomagneticRepository,
     )
+    private val observeLocationEnabled = ObserveLocationEnabledUseCase(locationRepository)
 
     val compassViewModelFactory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T =
             CompassViewModel(
                 observeLondonDirection = observeLondonDirection,
+                observeLocationEnabled = observeLocationEnabled,
                 dispatchers = dispatchers,
                 hasCompassSensor = hasCompassSensor,
             ) as T

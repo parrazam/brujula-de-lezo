@@ -3,6 +3,12 @@ package com.brujuladelezo.presentation
 import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import androidx.activity.compose.LocalActivity
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.res.stringResource
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import android.net.Uri
 import android.os.Build
 import android.os.VibrationEffect
@@ -38,7 +44,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -65,24 +70,38 @@ import com.brujuladelezo.domain.model.CompassAccuracy
 private val ContentPadding = 24.dp
 private val WideGap = 32.dp
 
+private const val LOCATION_PERMISSION = Manifest.permission.ACCESS_COARSE_LOCATION
+
 @Composable
 fun CompassScreen(viewModel: CompassViewModel) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val activity = LocalActivity.current
 
-    var permissionDeniedPermanently by remember { mutableStateOf(false) }
+    // Guardados para que girar la pantalla no vuelva a lanzar el diálogo ni olvide la negativa.
+    var askedOnce by rememberSaveable { mutableStateOf(false) }
+    var permissionDeniedPermanently by rememberSaveable { mutableStateOf(false) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
         viewModel.onPermissionResult(granted)
-        if (!granted) permissionDeniedPermanently = true
+        // Tras una negativa, el sistema deja de ofrecer la explicación cuando ya no va a volver a
+        // mostrar el diálogo. Antes se daba por definitiva la primera negativa.
+        permissionDeniedPermanently =
+            !granted && activity?.shouldShowRequestPermissionRationale(LOCATION_PERMISSION) == false
     }
 
-    LaunchedEffect(Unit) {
-        if (!uiState.hasLocationPermission) {
-            permissionLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
+    // En cada vuelta a primer plano: si el permiso se concedió desde Ajustes, se nota aquí.
+    LifecycleResumeEffect(Unit) {
+        if (context.hasLocationPermission()) {
+            permissionDeniedPermanently = false
+            viewModel.onPermissionResult(true)
+        } else if (!askedOnce) {
+            askedOnce = true
+            permissionLauncher.launch(LOCATION_PERMISSION)
         }
+        onPauseOrDispose { }
     }
 
     // Vibrate when pointing at London
@@ -109,12 +128,30 @@ fun CompassScreen(viewModel: CompassViewModel) {
                 !uiState.hasCompassSensor -> NoSensorMessage()
                 !uiState.hasLocationPermission -> PermissionMessage(
                     permanentlyDenied = permissionDeniedPermanently,
-                    onRequest = { permissionLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION) },
+                    onRequest = { permissionLauncher.launch(LOCATION_PERMISSION) },
                     onOpenSettings = { context.openAppSettings() },
                 )
-                uiState.isLoading -> CircularProgressIndicator(
-                    color = MaterialTheme.colorScheme.primary,
+                uiState.showLocationDisabled -> StatusMessage(
+                    title = stringResource(R.string.location_disabled_title),
+                    body = stringResource(R.string.location_disabled_body),
+                    action = stringResource(R.string.location_disabled_action),
+                    onAction = { context.openLocationSettings() },
                 )
+                uiState.trackingFailed -> StatusMessage(
+                    title = stringResource(R.string.tracking_failed_title),
+                    body = stringResource(R.string.tracking_failed_body),
+                    action = stringResource(R.string.tracking_failed_action),
+                    onAction = viewModel::retry,
+                )
+                uiState.isLoading -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = stringResource(R.string.compass_locating),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onBackground,
+                    )
+                }
                 else -> CompassContent(uiState = uiState)
             }
         }
@@ -226,7 +263,7 @@ private fun CompassDial(rotation: Float, size: Dp) {
 private fun PointingMessage(visible: Boolean) {
     AnimatedVisibility(visible = visible) {
         Text(
-            text = "¡Apuntando a la pérfida Albión!",
+            text = stringResource(R.string.compass_pointing),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.tertiary,
             textAlign = TextAlign.Center,
@@ -237,7 +274,7 @@ private fun PointingMessage(visible: Boolean) {
 @Composable
 private fun Quote() {
     Text(
-        text = "«Todo buen español deberá mear siempre mirando a Inglaterra»",
+        text = stringResource(R.string.compass_quote),
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
         textAlign = TextAlign.Center,
@@ -245,7 +282,7 @@ private fun Quote() {
     )
     Spacer(modifier = Modifier.height(4.dp))
     Text(
-        text = "— Blas de Lezo",
+        text = stringResource(R.string.compass_quote_author),
         style = MaterialTheme.typography.labelMedium,
         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
         textAlign = TextAlign.Center,
@@ -270,7 +307,7 @@ private fun CalibrationCard() {
             .padding(horizontal = 16.dp),
     ) {
         Text(
-            text = "⚠ Brújula sin calibrar — mueve el móvil en forma de 8",
+            text = stringResource(R.string.compass_calibration),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.tertiary,
             textAlign = TextAlign.Center,
@@ -285,25 +322,56 @@ private fun PermissionMessage(
     onRequest: () -> Unit,
     onOpenSettings: () -> Unit,
 ) {
+    if (permanentlyDenied) {
+        StatusMessage(
+            title = null,
+            body = stringResource(R.string.permission_denied_forever),
+            action = stringResource(R.string.permission_open_settings),
+            onAction = onOpenSettings,
+        )
+    } else {
+        StatusMessage(
+            title = null,
+            body = stringResource(R.string.permission_rationale),
+            action = stringResource(R.string.permission_grant),
+            onAction = onRequest,
+        )
+    }
+}
+
+/** Mensaje a pantalla completa con una única acción para salir del atasco. */
+@Composable
+private fun StatusMessage(
+    title: String?,
+    body: String,
+    action: String,
+    onAction: () -> Unit,
+) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(32.dp),
+        modifier = Modifier
+            .widthIn(max = 480.dp)
+            .verticalScroll(rememberScrollState())
+            .padding(32.dp),
     ) {
+        if (title != null) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+        }
         Text(
-            text = "Para apuntar a Londres necesitamos conocer tu ubicación aproximada.",
+            text = body,
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onBackground,
         )
         Spacer(modifier = Modifier.height(24.dp))
-        if (permanentlyDenied) {
-            TextButton(onClick = onOpenSettings) {
-                Text("Abrir Ajustes")
-            }
-        } else {
-            Button(onClick = onRequest) {
-                Text("Conceder ubicación")
-            }
+        Button(onClick = onAction) {
+            Text(action)
         }
     }
 }
@@ -311,7 +379,7 @@ private fun PermissionMessage(
 @Composable
 private fun NoSensorMessage() {
     Text(
-        text = "Tu dispositivo no tiene brújula.",
+        text = stringResource(R.string.no_compass_sensor),
         style = MaterialTheme.typography.titleMedium,
         color = MaterialTheme.colorScheme.onBackground,
         textAlign = TextAlign.Center,
@@ -364,6 +432,13 @@ private fun CompassContentPreview() {
             CompassContent(uiState = previewState)
         }
     }
+}
+
+private fun Context.hasLocationPermission(): Boolean =
+    ContextCompat.checkSelfPermission(this, LOCATION_PERMISSION) == PackageManager.PERMISSION_GRANTED
+
+private fun Context.openLocationSettings() {
+    startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
 }
 
 private fun Context.openAppSettings() {

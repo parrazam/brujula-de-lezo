@@ -73,7 +73,7 @@ design-system  → (sin dependencias internas) (Compose)
 |---|---|---|
 | `:core` | Tipos base compartidos | `DispatcherProvider`/`DefaultDispatcherProvider`, `AppError` (sealed interface) |
 | `:domain` | Modelos, contratos de repositorio, lógica de negocio pura | `GeoPoint`, `Landmarks.LONDON`, `LondonDirection`, `CompassAccuracy`, `RawOrientation`, `BearingCalculator`, `ObserveLondonDirectionUseCase`, interfaces `LocationRepository`/`OrientationRepository`/`GeomagneticRepository` |
-| `:data` | Implementaciones de repositorio sobre APIs de Android | `LocationRepositoryImpl` (`LocationManager`, sin Play Services), `OrientationRepositoryImpl` (`SensorManager` + rotación del display inyectada), `GeomagneticRepositoryImpl` (`GeomagneticField`) |
+| `:data` | Implementaciones de repositorio sobre APIs de Android | `LocationRepositoryImpl` (`LocationManager` con los proveedores fusionado de AOSP en API 31+, red y pasivo; sin Play Services), `OrientationRepositoryImpl` (`SensorManager` + rotación del display inyectada), `GeomagneticRepositoryImpl` (`GeomagneticField`) |
 | `:presentation` | ViewModel y pantalla Compose | `CompassViewModel` (`StateFlow<CompassUiState>`), `CompassUiState`, `CompassScreen` |
 | `:design-system` | Componentes Compose reutilizables, tema | `CompassRose`, `LondonNeedle`, `CruzDeBorgona`, tema Material 3 |
 | `:app` | Entry point, DI manual | `MainActivity`, `BrujulaApplication`, `AppContainer` |
@@ -88,7 +88,7 @@ design-system  → (sin dependencias internas) (Compose)
 2. **Norte verdadero**: `azimutVerdadero = azimutMagnético + GeomagneticField.declination` (`GeomagneticRepositoryImpl`).
 3. **Rumbo a Londres** (`BearingCalculator.initialBearing`): fórmula de círculo máximo, `atan2(sinΔλ·cosφ₂, cosφ₁·sinφ₂ − sinφ₁·cosφ₂·cosΔλ)`.
 4. **Ángulo de la aguja**: `BearingCalculator.normalizeDegrees(rumbo − azimutVerdadero)`.
-5. **"Apuntando a Londres"**: `|BearingCalculator.relativeAngle(rumbo, azimut)| < 5°` (constante `POINTING_THRESHOLD_DEGREES` en `ObserveLondonDirectionUseCase`) → dispara vibración háptica.
+5. **"Apuntando a Londres"**: con histéresis (`PointingHysteresis`): se entra cuando `|BearingCalculator.relativeAngle(rumbo, azimut)| < 5°` y no se sale hasta superar 8°. Con un solo umbral, el ruido del sensor cruzaba los 5° varias veces por segundo y cada cruce volvía a vibrar. El estado de la histéresis vive dentro del `flow {}` del caso de uso, uno por colector.
 
 Todo esto se combina en `ObserveLondonDirectionUseCase.invoke()`, que hace `combine()` de los flows de ubicación y orientación y emite un `LondonDirection` por cada actualización.
 
@@ -96,8 +96,10 @@ Todo esto se combina en `ObserveLondonDirectionUseCase.invoke()`, que hace `comb
 
 - **UseCase**: `operator fun invoke()` devolviendo `Flow<T>` para lógica reactiva (ver `ObserveLondonDirectionUseCase`)
 - **Repository**: interfaz en `domain`, implementación en `data`, basada en `callbackFlow` para APIs de callback de Android (sensores, ubicación)
-- **UiState**: data class inmutable (`CompassUiState`) expuesta como `StateFlow` desde el ViewModel; se actualiza con `MutableStateFlow.update {}`
-- **Errores**: `AppError` sealed interface en `core` (`SinSensorBrujula`, `SinPermisoUbicacion`, `UbicacionDesactivada`)
+- **UiState**: data class inmutable (`CompassUiState`) expuesta como `StateFlow`. `CompassViewModel` la construye con `flatMapLatest` sobre la petición (permiso + reintento) y `stateIn(WhileSubscribed(5_000))`: los sensores y la ubicación solo están registrados mientras la UI observa. Antes se recogía en `viewModelScope` sin más y seguían activos con la app en segundo plano. No volver a lanzar colecciones largas en `viewModelScope`.
+- **Permiso**: `CompassScreen` lo comprueba en cada `ON_RESUME` (`LifecycleResumeEffect`) para enterarse si se concedió desde Ajustes, y solo lo da por denegado para siempre cuando `shouldShowRequestPermissionRationale` devuelve `false` tras una negativa.
+- **Errores**: `AppError` sealed interface en `core` (`SinSensorBrujula`, `SinPermisoUbicacion`, `UbicacionDesactivada`). En la UI: sin ubicación del sistema y sin un primer rumbo se pide activarla (`CompassUiState.showLocationDisabled`); si el flujo de sensores falla se muestra un mensaje con «Reintentar», nunca una aguja a 0°.
+- **Textos**: en `res/values/strings.xml` de cada módulo, con `tools:locale="es"` (sin él, el lint `Typos` corrige el español como si fuera inglés).
 
 ### Anti-patrones críticos
 

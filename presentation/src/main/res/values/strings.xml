@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="es">
+    <string name="compass_pointing">¡Apuntando a la pérfida Albión!</string>
+    <string name="compass_quote">«Todo buen español deberá mear siempre mirando a Inglaterra»</string>
+    <string name="compass_quote_author">— Blas de Lezo</string>
+    <string name="compass_calibration">⚠ Brújula sin calibrar — mueve el móvil en forma de 8</string>
+    <string name="compass_locating">Buscando tu posición…</string>
+
+    <string name="permission_rationale">Para apuntar a Londres necesitamos conocer tu ubicación aproximada.</string>
+    <string name="permission_grant">Conceder ubicación</string>
+    <string name="permission_denied_forever">Has denegado el permiso de ubicación. Puedes concederlo en los ajustes de la app.</string>
+    <string name="permission_open_settings">Abrir Ajustes</string>
+
+    <string name="location_disabled_title">La ubicación está desactivada</string>
+    <string name="location_disabled_body">Sin saber dónde estás no hay rumbo a Londres. Solo se usa en memoria y nunca sale del móvil.</string>
+    <string name="location_disabled_action">Activar ubicación</string>
+
+    <string name="tracking_failed_title">No se pudo leer la brújula</string>
+    <string name="tracking_failed_body">Los sensores dejaron de responder. Prueba otra vez; si se repite, reinicia la app.</string>
+    <string name="tracking_failed_action">Reintentar</string>
+
+    <string name="no_compass_sensor">Tu dispositivo no tiene brújula.</string>
+</resources>
