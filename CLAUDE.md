@@ -21,9 +21,10 @@ AGP 9 usa **Kotlin integrado**: los módulos Android (`app`, `data`, `presentati
 # Ejecutar todos los tests unitarios
 ./gradlew test
 
-# Tests de un módulo concreto (los módulos con lógica de negocio/tests son domain y presentation)
-./gradlew :domain:test                        # BearingCalculatorTest, ObserveLondonDirectionUseCaseTest
-./gradlew :presentation:testDebugUnitTest      # CompassViewModelTest
+# Tests de un módulo concreto
+./gradlew :domain:test                        # rumbo, distancia, histéresis, rumbo cardinal, ajustes, caso de uso
+./gradlew :presentation:testDebugUnitTest      # CompassViewModelTest, SettingsViewModelTest, DirectionFormatTest
+./gradlew :data:testDebugUnitTest              # AxisRemapTest, LocationProvidersTest
 
 # Ejecutar una clase de test concreta
 ./gradlew :domain:test --tests "com.brujuladelezo.domain.math.BearingCalculatorTest"
@@ -152,9 +153,11 @@ Play exige API 36 para publicar actualizaciones. Los dos cambios de comportamien
 
 ## Tests
 
-Stack: **JUnit 4 + MockK 1.14.9 + Turbine 1.2.1 + `kotlinx-coroutines-test`**, con `MainDispatcherRule` (en `presentation/src/test`) usando `UnconfinedTestDispatcher`.
+Stack: **JUnit 4 + MockK 1.14.11 + Turbine 1.2.1 + `kotlinx-coroutines-test`**, con `MainDispatcherRule` (en `presentation/src/test`) usando `UnconfinedTestDispatcher`. Los tests que comprueban `WhileSubscribed` corren con `runTest(mainDispatcherRule.dispatcher)` para compartir el reloj virtual y poder avanzar `STOP_TIMEOUT_MILLIS`. Los flows de prueba que emiten varios valores en un `combine` los espacian con `delay`: `combine` puede saltarse valores intermedios.
 
-`:data` solo tiene JUnit: su único test (`AxisRemapTest`) cubre lógica pura. Las constantes `Surface.ROTATION_*` y `SensorManager.AXIS_*` son `static final int` y kotlinc las inlinea, así que no hace falta Robolectric ni `unitTests.isReturnDefaultValues`.
+`:data` solo tiene JUnit: sus tests (`AxisRemapTest`, `LocationProvidersTest`) cubren lógica pura. Las constantes `Surface.ROTATION_*` y `SensorManager.AXIS_*` son `static final int` y kotlinc las inlinea, así que no hace falta Robolectric ni `unitTests.isReturnDefaultValues`.
+
+**Capturas sin emulador.** Para revisar el layout en varios tamaños sin dispositivo (p. ej. en un contenedor sin KVM) se puede renderizar `CompassContent` (es `internal` para esto) con Robolectric + Roborazzi en un arnés temporal: `testImplementation` de `robolectric` y `roborazzi-compose`, `unitTests.isIncludeAndroidResources = true`, la propiedad de sistema `roborazzi.test.record=true` y `RuntimeEnvironment.setQualifiers("w320dp-h540dp-xhdpi")`/`setFontScale(2f)` por caso. No está commiteado: ni Robolectric ni Roborazzi son dependencias del proyecto.
 
 ## Skills instalados
 
