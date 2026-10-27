@@ -44,6 +44,16 @@ AGP 9 usa **Kotlin integrado**: los módulos Android (`app`, `data`, `presentati
 
 El CI (`.github/workflows/android.yml`) ejecuta, en este orden, `test` → `lint` → `assembleDebug` en cada push a `master`/`develop` y en cada PR a `master` o a `release/**` (la rama común donde se integran las fases de una versión). El release (`.github/workflows/release.yml`) se dispara con tags `v*`, ejecuta `assembleRelease bundleRelease` y firma con un keystore decodificado desde el secret `KEYSTORE_BASE64` (variables de entorno `KEYSTORE_PASSWORD`, `KEY_PASSWORD`, `KEY_ALIAS`; ver `app/build.gradle.kts` → `signingConfigs`).
 
+## Releases
+
+No hay números de versión en el código (salen del tag, ver arriba), así que una release es un **tag anotado** `vX.Y.Z` empujado sobre el commit de `master` ya mergeado. Minor para funcionalidades nuevas, patch para arreglos.
+
+Preparación: una rama `release/vX.Y.Z` desde `master`. Si la versión tiene varias partes, cada una va en su propia rama con PR contra `release/vX.Y.Z` (el CI corre también en esas PRs) y se mergea al estar en verde; la rama común se valida en un dispositivo físico antes de su PR a `master`. Esa PR actualiza las listas de funcionalidades de cara al usuario: `README.md` y las tarjetas de `docs/index.html`.
+
+El cuerpo de la release es el **mensaje del tag**: un paso de `release.yml` lo lee por la API de GitHub (no por git, porque `actions/checkout` puede dejar el tag como ligero) y lo pasa como `body_path`; `generate_release_notes: true` añade debajo la lista de PRs. Escribirlo para usuarios, en español: la primera línea es el título (se renderiza `##`), un párrafo corto y luego secciones como línea suelta seguida de items `- ` (se renderizan `###`; p. ej. Novedades, Cambios de comportamiento, Interno). Crearlo con `git tag -a vX.Y.Z -F <fichero>` y `git push origin vX.Y.Z`. Un tag ligero da una release con solo la lista de PRs.
+
+`release.yml` también comprueba que las `.so` de 64 bits del APK estén alineadas a 16 KB (`readelf -lW`, todos los segmentos `LOAD` ≥ `0x4000`) y falla si no.
+
 ## Arquitectura
 
 Seis módulos Gradle, Clean Architecture, con esta jerarquía real de dependencias (ver `settings.gradle.kts` y los `build.gradle.kts` de cada módulo):
