@@ -96,8 +96,8 @@ import kotlin.math.abs
 private val ContentPadding = 24.dp
 private val WideGap = 32.dp
 
-/** compass_face.png es 1024×1024: hasta ~420dp (más el hueco del halo) no se reescala. */
-private val MaxDialSize = 448.dp
+/** compass_face.png es 1024×1024: hasta ~420dp no se reescala. */
+private val MaxDialSize = 420.dp
 private val MinDialSize = 200.dp
 private val MaxCardWidth = 520.dp
 private val TallGap = 12.dp
@@ -496,9 +496,6 @@ private fun Dial(uiState: CompassUiState, needleRotation: Float, modifier: Modif
     val description = dialDescription(uiState)
     CompassDial(
         needleRotation = needleRotation,
-        pointing = uiState.isPointingAtLondon,
-        haloColor = BrujulaTheme.colors.pointing,
-        ringGapColor = MaterialTheme.colorScheme.background,
         modifier = modifier.semantics {
             contentDescription = description
             liveRegion = LiveRegionMode.Polite

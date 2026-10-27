@@ -19,7 +19,7 @@ Una brújula para Android que no apunta al norte. Apunta siempre a Londres.
 Gires como gires el móvil, la aguja señala la dirección real hacia Londres (51,51 °N, 0,13 °O). Aplica la declinación magnética de tu posición para que el rumbo sea geográficamente exacto. Además:
 
 - Te dice a qué **distancia** queda Londres (en kilómetros o en millas náuticas), su **rumbo** («11° NNE») y **cuánto girar** para apuntar.
-- Cuando apuntas a Inglaterra (±5°), la rosa se enciende en burdeos y el móvil **vibra** una vez; se puede desactivar.
+- Cuando apuntas a Inglaterra (±5°), aparece el aviso «¡Apuntando a la pérfida Albión!» y el móvil **vibra** una vez; se puede desactivar.
 - Muestra la **precisión del sensor** y avisa cuando hay que calibrarlo.
 - **Tema** claro, oscuro o el del sistema, con las fuentes Fraunces e IBM Plex Sans, e icono temático en Android 13+.
 - Funciona con TalkBack: la rosa anuncia hacia dónde queda Londres.

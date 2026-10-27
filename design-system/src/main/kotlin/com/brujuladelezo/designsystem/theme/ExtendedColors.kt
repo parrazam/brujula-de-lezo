@@ -7,7 +7,7 @@ import androidx.compose.ui.graphics.Color
 
 /**
  * Colores sin rol equivalente en [ColorScheme]: la tarjeta destacada, las pastillas de estado y
- * el halo de "apuntando". Se leen con `BrujulaTheme.colors`.
+ * la pastilla de "apuntando". Se leen con `BrujulaTheme.colors`.
  */
 @Immutable
 data class ExtendedColors(
@@ -20,7 +20,7 @@ data class ExtendedColors(
     val onWarnContainer: Color,
     val neutralContainer: Color,
     val onNeutralContainer: Color,
-    /** Pastilla y halo al apuntar a Londres. */
+    /** Pastilla al apuntar a Londres. */
     val pointing: Color,
     val onPointing: Color,
 )
