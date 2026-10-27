@@ -1,11 +1,26 @@
 package com.brujuladelezo.domain.math
 
 import com.brujuladelezo.domain.model.GeoPoint
+import kotlin.math.asin
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
+import kotlin.math.sqrt
 
 object BearingCalculator {
+
+    /** Radio medio de la Tierra (IUGG), en km. */
+    private const val EARTH_RADIUS_KM = 6371.0088
+
+    /** Distancia de círculo máximo (haversine) entre dos puntos, en km. */
+    fun distanceKm(from: GeoPoint, to: GeoPoint): Double {
+        val lat1 = Math.toRadians(from.latitude)
+        val lat2 = Math.toRadians(to.latitude)
+        val dLat = lat2 - lat1
+        val dLon = Math.toRadians(to.longitude - from.longitude)
+        val h = sin(dLat / 2) * sin(dLat / 2) + cos(lat1) * cos(lat2) * sin(dLon / 2) * sin(dLon / 2)
+        return 2 * EARTH_RADIUS_KM * asin(sqrt(h.coerceIn(0.0, 1.0)))
+    }
 
     fun initialBearing(from: GeoPoint, to: GeoPoint): Double {
         val lat1 = Math.toRadians(from.latitude)

@@ -31,14 +31,17 @@ class ObserveLondonDirectionUseCase(
                 )
                 val bearing = BearingCalculator.initialBearing(location, Landmarks.LONDON).toFloat()
                 val arrowRotation = BearingCalculator.normalizeDegrees(bearing - trueAzimuth.toDouble())
-                val deviation = abs(BearingCalculator.relativeAngle(bearing, trueAzimuth))
-                pointing = PointingHysteresis.isPointing(deviation, wasPointing = pointing)
+                val turn = BearingCalculator.relativeAngle(bearing, trueAzimuth)
+                pointing = PointingHysteresis.isPointing(abs(turn), wasPointing = pointing)
 
                 emit(
                     LondonDirection(
                         arrowRotationDegrees = arrowRotation,
                         isPointingAtLondon = pointing,
                         accuracy = orientation.accuracy,
+                        bearingDegrees = bearing,
+                        distanceKm = BearingCalculator.distanceKm(location, Landmarks.LONDON),
+                        turnDegrees = turn,
                     )
                 )
             }

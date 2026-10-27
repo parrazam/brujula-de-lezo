@@ -2,6 +2,7 @@ package com.brujuladelezo.domain.usecase
 
 import app.cash.turbine.test
 import com.brujuladelezo.domain.math.BearingCalculator
+import com.brujuladelezo.domain.model.CardinalDirection
 import com.brujuladelezo.domain.model.CompassAccuracy
 import com.brujuladelezo.domain.model.GeoPoint
 import com.brujuladelezo.domain.model.Landmarks
@@ -96,5 +97,24 @@ class ObserveLondonDirectionUseCaseTest {
         val useCase = makeUseCase(madrid, azimuths, declination = 0f)
         val pointing = useCase().toList().map { it.isPointingAtLondon }
         assertEquals(listOf(false, true, true, true, false), pointing)
+    }
+
+    @Test
+    fun `emite rumbo, distancia y cuanto girar`() = runTest {
+        // Mirando al este (90°) desde Madrid: Londres queda ~79° a la izquierda.
+        val direction = makeUseCase(azimuth = 90f, declination = 0f)().toList().single()
+        assertEquals(11.36f, direction.bearingDegrees, 0.1f)
+        assertEquals(CardinalDirection.NNE, direction.cardinal)
+        assertEquals(1264.0, direction.distanceKm, 5.0)
+        assertEquals(-78.64f, direction.turnDegrees, 0.1f)
+    }
+
+    @Test
+    fun `la declinacion se aplica antes de calcular el giro`() = runTest {
+        // Sensor magnético a 0° con declinación +11,36°: el norte verdadero ya mira a Londres.
+        val bearing = BearingCalculator.initialBearing(madrid, Landmarks.LONDON).toFloat()
+        val direction = makeUseCase(azimuth = 0f, declination = bearing)().toList().single()
+        assertEquals(0f, direction.turnDegrees, 0.01f)
+        assertTrue(direction.isPointingAtLondon)
     }
 }

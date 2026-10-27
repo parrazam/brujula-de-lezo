@@ -15,13 +15,18 @@ import android.provider.Settings
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -31,12 +36,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -51,6 +60,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.layout.Layout
@@ -66,15 +76,21 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.brujuladelezo.designsystem.components.CompassDial
+import com.brujuladelezo.designsystem.components.HeroCard
 import com.brujuladelezo.designsystem.components.StatusPill
+import com.brujuladelezo.designsystem.icons.BrujulaIcons
 import com.brujuladelezo.designsystem.theme.BrujulaDeLezoTheme
 import com.brujuladelezo.designsystem.theme.BrujulaTheme
 import com.brujuladelezo.designsystem.theme.QuoteTextStyle
 import com.brujuladelezo.domain.math.BearingCalculator
+import com.brujuladelezo.domain.model.AppSettings
+import com.brujuladelezo.domain.model.CardinalDirection
 import com.brujuladelezo.domain.model.CompassAccuracy
+import com.brujuladelezo.domain.model.DistanceUnit
 import kotlin.math.abs
 
 private val ContentPadding = 24.dp
@@ -83,13 +99,21 @@ private val WideGap = 32.dp
 /** compass_face.png es 1024×1024: hasta ~420dp (más el hueco del halo) no se reescala. */
 private val MaxDialSize = 448.dp
 private val MinDialSize = 200.dp
+private val MaxCardWidth = 520.dp
 private val TallGap = 12.dp
 
 private const val LOCATION_PERMISSION = Manifest.permission.ACCESS_COARSE_LOCATION
 
 @Composable
-fun CompassScreen(viewModel: CompassViewModel) {
+fun CompassScreen(
+    viewModel: CompassViewModel,
+    settingsViewModel: SettingsViewModel,
+    appVersion: String,
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val settings by settingsViewModel.settings.collectAsStateWithLifecycle()
+    val currentSettings = settings ?: AppSettings()
+    var showSettings by rememberSaveable { mutableStateOf(false) }
     val context = LocalContext.current
     val activity = LocalActivity.current
 
@@ -121,7 +145,7 @@ fun CompassScreen(viewModel: CompassViewModel) {
 
     // Vibrate when pointing at London
     LaunchedEffect(uiState.isPointingAtLondon) {
-        if (uiState.isPointingAtLondon) {
+        if (uiState.isPointingAtLondon && currentSettings.vibrationEnabled) {
             vibrateDevice(context)
         }
     }
@@ -167,14 +191,35 @@ fun CompassScreen(viewModel: CompassViewModel) {
                         color = MaterialTheme.colorScheme.onBackground,
                     )
                 }
-                else -> CompassContent(uiState = uiState)
+                else -> CompassContent(
+                    uiState = uiState,
+                    distanceUnit = currentSettings.distanceUnit,
+                    onOpenSettings = { showSettings = true },
+                )
             }
         }
+    }
+
+    val privacyUrl = stringResource(R.string.settings_privacy_url)
+    if (showSettings) {
+        SettingsSheet(
+            settings = currentSettings,
+            appVersion = appVersion,
+            onThemeChange = settingsViewModel::setTheme,
+            onDistanceUnitChange = settingsViewModel::setDistanceUnit,
+            onVibrationChange = settingsViewModel::setVibrationEnabled,
+            onOpenPrivacy = { context.openUrl(privacyUrl) },
+            onDismiss = { showSettings = false },
+        )
     }
 }
 
 @Composable
-internal fun CompassContent(uiState: CompassUiState) {
+internal fun CompassContent(
+    uiState: CompassUiState,
+    distanceUnit: DistanceUnit = DistanceUnit.KILOMETERS,
+    onOpenSettings: () -> Unit = {},
+) {
     val needleRotation = rememberNeedleRotation(uiState.arrowRotation)
     val status = uiState.status()
 
@@ -184,16 +229,16 @@ internal fun CompassContent(uiState: CompassUiState) {
         // en vertical las dos columnas quedarían estrechas y con media pantalla vacía.
         val isWide = maxWidth >= 600.dp && maxWidth > maxHeight
         if (isWide) {
-            WideLayout(uiState, needleRotation, status, maxWidth, maxHeight)
+            WideLayout(uiState, needleRotation, status, distanceUnit, onOpenSettings, maxWidth, maxHeight)
         } else {
-            TallLayout(uiState, needleRotation, status, viewportHeight = maxHeight)
+            TallLayout(uiState, needleRotation, status, distanceUnit, onOpenSettings, viewportHeight = maxHeight)
         }
     }
 }
 
 /**
- * Cabecera, hueco de estado y cita miden lo que miden; la rosa se queda con el resto, así que no
- * puede invadir ni la pastilla de "apuntando" ni la cita (era lo que pasaba con una rosa de
+ * Cabecera, hueco de estado, tarjeta y cita miden lo que miden; la rosa se queda con el resto, así
+ * que no puede invadir ni la pastilla de "apuntando" ni la tarjeta (era lo que pasaba con una rosa de
  * tamaño fijo y el mensaje apareciendo encima). Si lo que queda no llega a [MinDialSize] (letra
  * muy grande en una pantalla baja), la rosa se queda en ese mínimo, todo se apila y la pantalla
  * se desplaza en vez de encoger la rosa hasta hacerla inútil.
@@ -203,14 +248,17 @@ private fun TallLayout(
     uiState: CompassUiState,
     needleRotation: Float,
     status: CompassStatus,
+    distanceUnit: DistanceUnit,
+    onOpenSettings: () -> Unit,
     viewportHeight: Dp,
 ) {
     val verticalPadding = 16.dp
     Layout(
         content = {
-            Header()
+            Header(onOpenSettings)
             StatusSlot(status)
             Dial(uiState, needleRotation, Modifier.fillMaxSize())
+            DirectionCard(uiState, distanceUnit)
             Quote()
         },
         modifier = Modifier
@@ -223,11 +271,13 @@ private fun TallLayout(
         val loose = Constraints(maxWidth = width)
         val header = measurables[0].measure(loose)
         val slot = measurables[1].measure(loose)
-        val quote = measurables[3].measure(loose)
+        // En tablet en vertical, a todo el ancho la tarjeta quedaba como una franja vacía.
+        val card = measurables[3].measure(Constraints(maxWidth = minOf(width, MaxCardWidth.roundToPx())))
+        val quote = measurables[4].measure(loose)
 
         // verticalScroll da alto infinito: el disponible es el de la ventana menos el padding.
         val available = (viewportHeight - verticalPadding * 2).roundToPx()
-        val fixed = header.height + slot.height + quote.height + gap * 3
+        val fixed = header.height + slot.height + card.height + quote.height + gap * 4
         val dialSide = minOf(width, available - fixed, MaxDialSize.roundToPx())
             .coerceAtLeast(minOf(width, MinDialSize.roundToPx()))
         val dial = measurables[2].measure(Constraints.fixed(dialSide, dialSide))
@@ -239,9 +289,10 @@ private fun TallLayout(
             y += header.height + gap
             slot.placeRelative((width - slot.width) / 2, y)
             y += slot.height + gap
-            // La rosa, centrada en el hueco entre el estado y la cita.
-            val dialSpace = height - y - quote.height - gap
+            // La rosa, centrada en el hueco entre el estado y la tarjeta.
+            val dialSpace = height - y - card.height - quote.height - gap * 2
             dial.placeRelative((width - dialSide) / 2, y + (dialSpace - dialSide) / 2)
+            card.placeRelative((width - card.width) / 2, height - quote.height - gap - card.height)
             quote.placeRelative((width - quote.width) / 2, height - quote.height)
         }
     }
@@ -252,6 +303,8 @@ private fun WideLayout(
     uiState: CompassUiState,
     needleRotation: Float,
     status: CompassStatus,
+    distanceUnit: DistanceUnit,
+    onOpenSettings: () -> Unit,
     maxWidth: Dp,
     maxHeight: Dp,
 ) {
@@ -277,24 +330,98 @@ private fun WideLayout(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Header(centered = true)
+            Header(onOpenSettings)
             StatusSlot(status)
+            DirectionCard(uiState, distanceUnit)
             Quote()
         }
     }
 }
 
 @Composable
-private fun Header(centered: Boolean = false) {
-    Text(
-        text = stringResource(R.string.compass_title),
-        style = MaterialTheme.typography.titleLarge,
-        color = MaterialTheme.colorScheme.primary,
-        textAlign = if (centered) TextAlign.Center else TextAlign.Start,
-        modifier = Modifier
-            .fillMaxWidth()
-            .semantics { heading() },
-    )
+private fun Header(onOpenSettings: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = stringResource(R.string.compass_title),
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier
+                .weight(1f)
+                .semantics { heading() },
+        )
+        IconButton(onClick = onOpenSettings) {
+            Icon(
+                imageVector = BrujulaIcons.Settings,
+                contentDescription = stringResource(R.string.settings_open),
+                tint = MaterialTheme.colorScheme.onBackground,
+            )
+        }
+    }
+}
+
+/**
+ * Distancia, rumbo y cuánto girar. «Gira» desaparece al estar en el blanco: ahí ya no hay nada
+ * que girar. La declinación magnética se aplica en el cálculo, pero no se enseña: no ayuda a
+ * apuntar.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun DirectionCard(uiState: CompassUiState, distanceUnit: DistanceUnit) {
+    val colors = BrujulaTheme.colors
+    val locale = LocalConfiguration.current.locales[0]
+    HeroCard(modifier = Modifier.semantics(mergeDescendants = true) {}) {
+        Text(
+            text = stringResource(R.string.card_label).uppercase(locale),
+            style = MaterialTheme.typography.labelSmall,
+            color = colors.onHeroMuted,
+        )
+        Row(verticalAlignment = Alignment.Bottom) {
+            Text(
+                text = formatDistance(uiState.distanceKm, distanceUnit, locale),
+                style = MaterialTheme.typography.displaySmall,
+                modifier = Modifier.alignByBaseline(),
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = stringResource(
+                    if (distanceUnit == DistanceUnit.KILOMETERS) R.string.unit_km_short else R.string.unit_nmi_short
+                ),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.alignByBaseline(),
+            )
+        }
+        HorizontalDivider(
+            modifier = Modifier.padding(vertical = 10.dp),
+            color = colors.onHero.copy(alpha = 0.18f),
+        )
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(28.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            CardFact(
+                value = stringResource(R.string.card_bearing_value, roundedBearing(uiState.bearingDegrees), uiState.cardinal.abbreviation),
+                label = stringResource(R.string.card_bearing_label),
+            )
+            AnimatedVisibility(visible = !uiState.isPointingAtLondon, enter = fadeIn(), exit = fadeOut()) {
+                val magnitude = turnMagnitude(uiState.turnDegrees)
+                CardFact(
+                    value = stringResource(
+                        if (uiState.turnDegrees >= 0f) R.string.card_turn_right else R.string.card_turn_left,
+                        magnitude,
+                    ),
+                    label = stringResource(R.string.card_turn_label),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun CardFact(value: String, label: String) {
+    Column {
+        Text(text = value, style = MaterialTheme.typography.titleMedium)
+        Text(text = label, style = MaterialTheme.typography.bodySmall, color = BrujulaTheme.colors.onHeroMuted)
+    }
 }
 
 /** Lo que dice el hueco de estado; solo uno a la vez, por orden de importancia. */
@@ -531,10 +658,15 @@ private val previewPointing = CompassUiState(
     isPointingAtLondon = true,
     accuracy = CompassAccuracy.ALTA,
     hasLocationPermission = true,
+    bearingDegrees = 11.4f,
+    cardinal = CardinalDirection.NNE,
+    distanceKm = 1264.0,
+    turnDegrees = 2f,
 )
 
 private val previewCalibrating = previewPointing.copy(
     arrowRotation = 300f,
+    turnDegrees = -60f,
     isPointingAtLondon = false,
     accuracy = CompassAccuracy.BAJA,
 )
@@ -577,6 +709,11 @@ private fun Context.hasLocationPermission(): Boolean =
 
 private fun Context.openLocationSettings() {
     startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+}
+
+private fun Context.openUrl(url: String) {
+    // Sin navegador instalado no hay a quién mandarlo; mejor no hacer nada que reventar.
+    runCatching { startActivity(Intent(Intent.ACTION_VIEW, url.toUri())) }
 }
 
 private fun Context.openAppSettings() {

@@ -1,5 +1,6 @@
 package com.brujuladelezo.presentation
 
+import com.brujuladelezo.domain.model.CardinalDirection
 import com.brujuladelezo.domain.model.CompassAccuracy
 
 data class CompassUiState(
@@ -13,6 +14,11 @@ data class CompassUiState(
     val isLocationEnabled: Boolean = true,
     /** El flujo de sensores falló; la aguja no es fiable y no se muestra. */
     val trackingFailed: Boolean = false,
+    val bearingDegrees: Float = 0f,
+    val cardinal: CardinalDirection = CardinalDirection.N,
+    val distanceKm: Double = 0.0,
+    /** Positivo = gira a la derecha. */
+    val turnDegrees: Float = 0f,
 ) {
     /**
      * Sin ubicación del sistema solo bloquea mientras no haya un primer rumbo: si se apaga
