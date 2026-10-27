@@ -19,7 +19,7 @@ jobs:
           persist-credentials: false
 
       - name: Set up JDK 21
-        uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5.6.0
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
           java-version: '21'
           distribution: 'temurin'
@@ -65,13 +65,57 @@ jobs:
           "$APKSIGNER" verify --print-certs \
             app/build/outputs/apk/release/brujula-de-lezo-${{ github.ref_name }}.apk
 
+      # Play exige que las .so de 64 bits estén alineadas a 16 KB. La app no trae nativas propias,
+      # pero Compose arrastra libandroidx.graphics.path.so; si una subida de Compose la desalinea,
+      # que falle aquí y no en la consola de Play.
+      - name: Verify 16 KB page alignment
+        run: |
+          APK=app/build/outputs/apk/release/brujula-de-lezo-${{ github.ref_name }}.apk
+          rm -rf so-check && unzip -q "$APK" 'lib/*' -d so-check || { echo "Sin bibliotecas nativas"; exit 0; }
+          fail=0
+          for so in so-check/lib/arm64-v8a/*.so so-check/lib/x86_64/*.so; do
+            [ -e "$so" ] || continue
+            for align in $(readelf -lW "$so" | awk '$1=="LOAD"{print $NF}'); do
+              if [ $((align)) -lt $((0x4000)) ]; then echo "::error::$so tiene un segmento LOAD alineado a $align"; fail=1; fi
+            done
+            echo "$so OK"
+          done
+          exit $fail
+
+      # La action no lee la anotación del tag por su cuenta: hasta ahora la release salía solo
+      # con las notas automáticas aunque el tag tuviera mensaje. Se pide a la API y no a git
+      # porque actions/checkout puede dejar el tag como ligero. Un tag ligero da cuerpo vacío.
+      - name: Release notes from annotated tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          ref=$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/${TAG}")
+          : > release-notes.md
+          if [ "$(jq -r .object.type <<<"$ref")" = "tag" ]; then
+            gh api "repos/${GITHUB_REPOSITORY}/git/tags/$(jq -r .object.sha <<<"$ref")" --jq .message |
+              awk '
+                # Primera línea → título (##); línea suelta seguida de una lista → sección (###).
+                /^-----BEGIN (PGP|SSH) SIGNATURE-----/ { exit }
+                { lines[NR] = $0 }
+                END {
+                  for (i = 1; i <= NR; i++) {
+                    l = lines[i]
+                    if (i == 1) { print "## " l; continue }
+                    if (l != "" && l !~ /^[- ]/ && lines[i-1] == "" && lines[i+1] ~ /^- /) { print "### " l; continue }
+                    print l
+                  }
+                }' > release-notes.md
+          fi
+          cat release-notes.md
+
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
           name: "Brújula de Lezo ${{ github.ref_name }}"
-          # El nombre correcto del input es generate_release_notes; con generate_notes
-          # la action lo ignoraba en silencio (v3 ya avisa) y el cuerpo de la release
-          # era solo el mensaje del tag anotado, que sigue usándose como body.
+          # El input es generate_release_notes (con generate_notes la action lo ignoraba en
+          # silencio). Las notas automáticas (PRs desde el tag anterior) van debajo del body.
+          body_path: release-notes.md
           generate_release_notes: true
           files: |
             app/build/outputs/apk/release/brujula-de-lezo-${{ github.ref_name }}.apk
