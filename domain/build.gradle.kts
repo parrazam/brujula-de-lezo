@@ -1,5 +1,6 @@
+// Sin versión: KGP ya está en el classpath del buildscript raíz, fijado a libs.versions.kotlin.
 plugins {
-    alias(libs.plugins.kotlin.jvm)
+    kotlin("jvm")
 }
 
 kotlin {

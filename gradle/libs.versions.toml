@@ -1,13 +1,13 @@
 [versions]
-agp = "8.13.2"
-kotlin = "2.2.21"
-composeBom = "2026.04.01"
+agp = "9.4.1"
+kotlin = "2.4.21"
+composeBom = "2026.06.01"
 activityCompose = "1.13.0"
 lifecycleViewmodel = "2.10.0"
-coroutines = "1.10.2"
+coroutines = "1.11.0"
 coreKtx = "1.18.0"
 junit = "4.13.2"
-mockk = "1.14.9"
+mockk = "1.14.11"
 turbine = "1.2.1"
 
 [libraries]
@@ -30,9 +30,10 @@ kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-cor
 compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 
+# Plugins de Gradle que van en el classpath del buildscript raíz
+kotlin-gradle-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
