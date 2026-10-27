@@ -5,6 +5,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.ReadOnlyComposable
 
 private val LightColors = lightColorScheme(
     primary = AzulMarinoImperial,
@@ -43,9 +45,21 @@ fun BrujulaDeLezoTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit,
 ) {
-    MaterialTheme(
-        colorScheme = if (darkTheme) DarkColors else LightColors,
-        typography = BrujulaTypography,
-        content = content,
-    )
+    CompositionLocalProvider(
+        LocalExtendedColors provides if (darkTheme) DarkExtendedColors else LightExtendedColors,
+    ) {
+        MaterialTheme(
+            colorScheme = if (darkTheme) DarkColors else LightColors,
+            typography = BrujulaTypography,
+            content = content,
+        )
+    }
+}
+
+object BrujulaTheme {
+    /** Colores propios de la app; ver [ExtendedColors]. */
+    val colors: ExtendedColors
+        @Composable
+        @ReadOnlyComposable
+        get() = LocalExtendedColors.current
 }
