@@ -6,7 +6,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **brujula-de-lezo** es una app Android nativa (Kotlin + Jetpack Compose) que funciona como brújula: en vez de señalar al norte, la aguja apunta siempre hacia Londres (51,5074°N, -0,1278°O), aplicando la declinación magnética real de la posición del usuario. Vibra cuando el usuario apunta a Inglaterra (±5°) y no depende de red ni de Google Play Services.
 
-`applicationId` / namespace raíz: `com.brujuladelezo`. `minSdk` 26, `compileSdk`/`targetSdk` 36, JVM target 21, Kotlin 2.2.21, AGP 8.13.2, Gradle 9.0.0.
+`applicationId` / namespace raíz: `com.brujuladelezo`. `minSdk` 26, `compileSdk`/`targetSdk` 36, JVM target 21, Kotlin 2.4.21, AGP 9.4.1, Gradle 9.8.2.
+
+AGP 9 usa **Kotlin integrado**: los módulos Android (`app`, `data`, `presentation`, `design-system`) no aplican `org.jetbrains.kotlin.android` (AGP falla si se aplica) y su `jvmTarget` sale de `compileOptions.targetCompatibility`. AGP arrastra su propia versión de KGP, así que el `build.gradle.kts` raíz fija `libs.kotlin.gradle.plugin` en el classpath del buildscript; por eso `core` y `domain` aplican `kotlin("jvm")` **sin versión** (con versión, Gradle rechaza la petición porque el plugin ya está en el classpath). Actualizar AGP y el wrapper de Gradle a la vez (AGP 9.4 necesita Gradle ≥ 9.6). Las versiones de AndroidX/Compose están en las últimas compatibles con `compileSdk` 36: Compose BOM ≥ 2026.09, lifecycle ≥ 2.11 y core-ktx ≥ 1.19 exigen `compileSdk` 37.
+
+`versionCode`/`versionName` no se escriben a mano: salen de `git describe --tags --long` (`major*1_000_000 + minor*10_000 + patch*100 + commits desde la etiqueta`, ver `versionCodeFromDescribe` en `app/build.gradle.kts`), nunca de `rev-list --count`, que puede bajar tras un rebase. Las versiones 1.0.0 y 1.1.0 se publicaron con `versionCode` 1 y 2; cualquier valor derivado de un tag es mayor.
 
 ## Comandos de desarrollo
 
@@ -38,7 +42,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ./gradlew :app:dependencies
 ```
 
-El CI (`.github/workflows/android.yml`) ejecuta, en este orden, `test` → `lint` → `assembleDebug` en cada push/PR a `master`/`develop`. El release (`.github/workflows/release.yml`) se dispara con tags `v*`, ejecuta `assembleRelease bundleRelease` y firma con un keystore decodificado desde el secret `KEYSTORE_BASE64` (variables de entorno `KEYSTORE_PASSWORD`, `KEY_PASSWORD`, `KEY_ALIAS`; ver `app/build.gradle.kts` → `signingConfigs`).
+El CI (`.github/workflows/android.yml`) ejecuta, en este orden, `test` → `lint` → `assembleDebug` en cada push a `master`/`develop` y en cada PR a `master` o a `release/**` (la rama común donde se integran las fases de una versión). El release (`.github/workflows/release.yml`) se dispara con tags `v*`, ejecuta `assembleRelease bundleRelease` y firma con un keystore decodificado desde el secret `KEYSTORE_BASE64` (variables de entorno `KEYSTORE_PASSWORD`, `KEY_PASSWORD`, `KEY_ALIAS`; ver `app/build.gradle.kts` → `signingConfigs`).
 
 ## Arquitectura
 
