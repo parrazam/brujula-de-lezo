@@ -16,7 +16,14 @@ Una brújula para Android que no apunta al norte. Apunta siempre a Londres.
 
 ## Qué hace
 
-Gires como gires el móvil, la aguja señala la dirección real hacia Londres (51,51 °N, 0,13 °O). Aplica la declinación magnética de tu posición para que el rumbo sea geográficamente exacto, vibra cuando apuntas a Inglaterra (±5°) y avisa si el sensor de la brújula necesita calibración. En tablets y plegables rota libremente y reorganiza la pantalla en dos columnas.
+Gires como gires el móvil, la aguja señala la dirección real hacia Londres (51,51 °N, 0,13 °O). Aplica la declinación magnética de tu posición para que el rumbo sea geográficamente exacto. Además:
+
+- Te dice a qué **distancia** queda Londres (en kilómetros o en millas náuticas), su **rumbo** («11° NNE») y **cuánto girar** para apuntar.
+- Cuando apuntas a Inglaterra (±5°), aparece el aviso «¡Apuntando a la pérfida Albión!» y el móvil **vibra** una vez; se puede desactivar.
+- Muestra la **precisión del sensor** y avisa cuando hay que calibrarlo.
+- **Tema** claro, oscuro o el del sistema, con las fuentes Fraunces e IBM Plex Sans, e icono temático en Android 13+.
+- Funciona con TalkBack: la rosa anuncia hacia dónde queda Londres.
+- En tablets y plegables rota libremente y reorganiza la pantalla en dos columnas.
 
 ## Capturas
 
@@ -30,9 +37,9 @@ Gires como gires el móvil, la aguja señala la dirección real hacia Londres (5
 
 | | |
 |---|---|
-| **Lenguaje** | Kotlin 2.2.21 |
-| **UI** | Jetpack Compose + Material 3 (Compose BOM 2026.04.01) |
-| **Build** | AGP 8.13.2 + Gradle 9.0.0, JVM target 21 |
+| **Lenguaje** | Kotlin 2.4.21 |
+| **UI** | Jetpack Compose + Material 3 (Compose BOM 2026.06.01) |
+| **Build** | AGP 9.4.1 (Kotlin integrado) + Gradle 9.8.2, JVM target 21 |
 | **Arquitectura** | Clean Architecture multi-módulo |
 | **DI** | Manual (`AppContainer`) |
 | **Sensores** | `TYPE_ROTATION_VECTOR` + `GeomagneticField` |
@@ -56,10 +63,10 @@ design-system   ← Compose
 | Módulo | Responsabilidad |
 |---|---|
 | `:core` | `DispatcherProvider`, tipos base |
-| `:domain` | Modelos, interfaces de repositorio, `ObserveLondonDirectionUseCase`, `BearingCalculator` |
-| `:data` | `OrientationRepositoryImpl`, `LocationRepositoryImpl`, `GeomagneticRepositoryImpl` |
-| `:presentation` | `CompassViewModel`, `CompassScreen` |
-| `:design-system` | Tema Material 3, paleta del Siglo de Oro, `CompassRose`, `LondonNeedle` |
+| `:domain` | Modelos, interfaces de repositorio, casos de uso, `BearingCalculator`, `PointingHysteresis` |
+| `:data` | `OrientationRepositoryImpl`, `LocationRepositoryImpl`, `GeomagneticRepositoryImpl`, `SettingsRepositoryImpl` |
+| `:presentation` | `CompassViewModel`, `SettingsViewModel`, `CompassScreen`, `SettingsSheet` |
+| `:design-system` | Tema Material 3, paleta del Siglo de Oro, tipografía, `CompassDial`, `StatusPill`, `HeroCard` |
 | `:app` | `MainActivity`, `BrujulaApplication`, `AppContainer` |
 
 ## Cómo funciona la matemática
@@ -68,7 +75,8 @@ design-system   ← Compose
 2. **Norte verdadero**: `azimutVerdadero = azimutMagnético + GeomagneticField.declination`.
 3. **Rumbo a Londres**: fórmula de círculo máximo → `atan2(sinΔλ·cosφ₂, cosφ₁·sinφ₂ − sinφ₁·cosφ₂·cosΔλ)`.
 4. **Ángulo de la aguja**: `normalizeDegrees(rumboALondres − azimutVerdadero)`.
-5. **Apuntando**: cuando `|relativeAngle(rumbo, azimut)| < 5°` → vibración háptica.
+5. **Apuntando**: con histéresis, se entra cuando `|relativeAngle(rumbo, azimut)| < 5°` y se sale al pasar de 8°, para que el ruido del sensor no haga vibrar varias veces seguidas.
+6. **Distancia**: haversine sobre el radio medio terrestre (6371 km).
 
 ## Desarrollo local
 
@@ -91,19 +99,19 @@ Requiere **JDK 21** y **Android SDK con API 36**.
 ## Tests
 
 ```bash
-./gradlew :domain:test          # BearingCalculatorTest, ObserveLondonDirectionUseCaseTest
-./gradlew :presentation:testDebugUnitTest   # CompassViewModelTest
-./gradlew :data:testDebugUnitTest           # AxisRemapTest
+./gradlew :domain:test                      # rumbo, distancia, histéresis, rumbo cardinal, ajustes, caso de uso
+./gradlew :presentation:testDebugUnitTest   # CompassViewModelTest, SettingsViewModelTest, DirectionFormatTest
+./gradlew :data:testDebugUnitTest           # AxisRemapTest, LocationProvidersTest
 ```
 
-Stack de test: **JUnit 4 + MockK 1.14.9 + Turbine 1.2.1 + `MainDispatcherRule`** con `UnconfinedTestDispatcher`.
+Stack de test: **JUnit 4 + MockK 1.14.11 + Turbine 1.2.1 + `MainDispatcherRule`** con `UnconfinedTestDispatcher`.
 
 ## CI/CD
 
 | Disparador | Pipeline |
 |---|---|
-| Push a `master`/`develop`, PR a `master` | `android.yml` → test + lint + assembleDebug |
-| Tag `v*` | `release.yml` → assembleRelease + bundleRelease + firma APK + GitHub Release |
+| Push a `master`/`develop`, PR a `master` o `release/**` | `android.yml` → test + lint + assembleDebug |
+| Tag `v*` | `release.yml` → assembleRelease + bundleRelease + firma + comprobación de 16 KB + GitHub Release con las notas del tag anotado |
 
 Los artefactos de release se firman con un keystore codificado en el secret `KEYSTORE_BASE64`. Ver [`.github/workflows/`](.github/workflows/).
 
@@ -112,6 +120,8 @@ Los artefactos de release se firman con un keystore codificado en el secret `KEY
 - Sin acceso a internet: la app no pide permiso de red.
 - Sin telemetría, sin analítica, sin anuncios.
 - Permiso mínimo: `ACCESS_COARSE_LOCATION` — solo para calcular el rumbo, en memoria, sin almacenarlo.
+- Lo único que se guarda en el móvil son los ajustes de la app (tema, vibración y unidad de distancia).
+- Los sensores y la ubicación se sueltan en cuanto la app pasa a segundo plano.
 - Las coordenadas de Londres están escritas en el código; no se descargan datos.
 
 ## Licencia

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="es">
+    <string name="compass_pointing">¡Apuntando a la pérfida Albión!</string>
+    <string name="compass_quote">«Todo buen español deberá mear siempre mirando a Inglaterra»</string>
+    <string name="compass_quote_author">— Blas de Lezo</string>
+    <string name="compass_calibration">Sin calibrar: mueve el móvil en forma de 8</string>
+    <string name="compass_accuracy_high">Precisión alta</string>
+    <string name="compass_accuracy_medium">Precisión media</string>
+    <string name="compass_a11y_pointing">Apuntando a Londres</string>
+    <string name="compass_a11y_right">Londres está %1$d grados a tu derecha</string>
+    <string name="compass_a11y_left">Londres está %1$d grados a tu izquierda</string>
+    <string name="compass_locating">Buscando tu posición…</string>
+
+    <string name="permission_rationale">Para apuntar a Londres necesitamos conocer tu ubicación aproximada.</string>
+    <string name="permission_grant">Conceder ubicación</string>
+    <string name="permission_denied_forever">Has denegado el permiso de ubicación. Puedes concederlo en los ajustes de la app.</string>
+    <string name="permission_open_settings">Abrir Ajustes</string>
+
+    <string name="location_disabled_title">La ubicación está desactivada</string>
+    <string name="location_disabled_body">Sin saber dónde estás no hay rumbo a Londres. Solo se usa en memoria y nunca sale del móvil.</string>
+    <string name="location_disabled_action">Activar ubicación</string>
+
+    <string name="tracking_failed_title">No se pudo leer la brújula</string>
+    <string name="tracking_failed_body">Los sensores dejaron de responder. Prueba otra vez; si se repite, reinicia la app.</string>
+    <string name="tracking_failed_action">Reintentar</string>
+
+    <string name="card_label">Londres está a</string>
+    <string name="card_bearing_label">rumbo</string>
+    <string name="card_bearing_value">%1$d° %2$s</string>
+    <string name="card_turn_label">gira</string>
+    <string name="card_turn_right">%1$d° a la derecha</string>
+    <string name="card_turn_left">%1$d° a la izquierda</string>
+    <string name="unit_km_short">km</string>
+    <string name="unit_nmi_short">mn</string>
+
+    <string name="settings_open">Ajustes</string>
+    <string name="settings_title">Ajustes</string>
+    <string name="settings_theme">Tema</string>
+    <string name="settings_theme_system">Sistema</string>
+    <string name="settings_theme_light">Claro</string>
+    <string name="settings_theme_dark">Oscuro</string>
+    <string name="settings_distance">Distancia en</string>
+    <string name="settings_distance_km">Kilómetros</string>
+    <string name="settings_distance_nmi">Millas náuticas</string>
+    <string name="settings_vibration">Vibrar al apuntar</string>
+    <string name="settings_vibration_hint">Un toque al entrar en ±5°</string>
+    <string name="settings_privacy">Política de privacidad</string>
+    <string name="settings_version">Versión</string>
+    <string name="settings_privacy_url" translatable="false">https://brujuladelezo.cuzo.dev/privacy.html</string>
+
+    <string name="no_compass_sensor">Tu dispositivo no tiene brújula.</string>
+</resources>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Capa monocroma del icono adaptativo (iconos temáticos, Android 13+). El sistema solo usa el
+    canal alfa y la tiñe; sin ella mostraba un círculo genérico. Es la rosa del favicon de la web
+    simplificada a una tinta, dentro del círculo seguro de 66dp.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <path
+        android:pathData="M54,26 a28,28 0 1,1 0,56 a28,28 0 1,1 0,-56"
+        android:strokeWidth="3"
+        android:strokeColor="#FFFFFFFF" />
+
+    <!-- Punta norte entera; las otras tres, a media tinta. -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M54,23 L60,54 L48,54 Z" />
+    <path
+        android:fillAlpha="0.5"
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M54,85 L60,54 L48,54 Z M85,54 L54,60 L54,48 Z M23,54 L54,60 L54,48 Z" />
+
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M54,49 a5,5 0 1,1 0,10 a5,5 0 1,1 0,-10" />
+</vector>
