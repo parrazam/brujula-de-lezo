@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:locale="es">
-    <string name="compass_title">Brújula de Lezo</string>
     <string name="compass_pointing">¡Apuntando a la pérfida Albión!</string>
     <string name="compass_quote">«Todo buen español deberá mear siempre mirando a Inglaterra»</string>
     <string name="compass_quote_author">— Blas de Lezo</string>
