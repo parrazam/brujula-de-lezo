@@ -95,15 +95,23 @@
         </ul>
       </div>
 
-      <!-- Mockup móvil — la pantalla real de la app, modo claro y oscuro -->
+      <!-- Mockup móvil: réplica de CompassScreen 1.2 (sin título; estado + ajustes, rosa, tarjeta y cita) -->
       <div class="phones" aria-label="Capturas de la app">
         <div class="phone phone--back" aria-hidden="true">
           <div class="phone__screen">
             <div class="screen screen--dark">
-              <div class="albion" style="visibility:hidden">·</div>
+              <div class="app-top">
+                <span class="app-pill app-pill--ok"><span class="app-pill__dot"></span>Precisión alta</span>
+                <svg class="app-gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>
+              </div>
               <div class="compass">
                 <img class="compass__face" src="compass_face.png" alt="" />
                 <img class="compass__needle" src="compass_needle.png" alt="" style="--needle: 28deg" />
+              </div>
+              <div class="app-card">
+                <span class="app-card__label">Londres está a</span>
+                <span class="app-card__big">1.264<small>km</small></span>
+                <span class="app-card__facts"><span><b>11° NNE</b>rumbo</span><span><b>28° a la derecha</b>gira</span></span>
               </div>
               <blockquote class="quote">
                 «Todo buen español deberá mear siempre mirando a Inglaterra»
@@ -117,10 +125,18 @@
           <div class="phone__notch" aria-hidden="true"></div>
           <div class="phone__screen">
             <div class="screen screen--light">
-              <div class="albion">¡Apuntando a la pérfida Albión!</div>
+              <div class="app-top">
+                <span class="app-pill app-pill--hit">¡Apuntando a la pérfida Albión!</span>
+                <svg class="app-gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>
+              </div>
               <div class="compass">
                 <img class="compass__face" src="compass_face.png" alt="Rosa de los vientos de la Brújula de Lezo" />
                 <img class="compass__needle" src="compass_needle.png" alt="Aguja apuntando a Londres" style="--needle: 0deg" />
+              </div>
+              <div class="app-card">
+                <span class="app-card__label">Londres está a</span>
+                <span class="app-card__big">1.264<small>km</small></span>
+                <span class="app-card__facts"><span><b>11° NNE</b>rumbo</span></span>
               </div>
               <blockquote class="quote">
                 «Todo buen español deberá mear siempre mirando a Inglaterra»
@@ -138,7 +154,7 @@
     <div class="section__head">
       <span class="eyebrow eyebrow--dark">Qué hace</span>
       <h2 class="section__title">Una sola obsesión:<br/>la pérfida Albión.</h2>
-      <p class="section__lead">No marca rumbos, no guarda rutas, no te dice dónde estás. Solo señala, con precisión geográfica, hacia dónde queda Inglaterra desde tu posición. Para lo que cada cual decida.</p>
+      <p class="section__lead">No es un navegador, no guarda rutas, no te dice dónde estás. Solo señala, con precisión geográfica, hacia dónde queda Inglaterra desde tu posición y a qué distancia. Para lo que cada cual decida.</p>
     </div>
 
     <div class="features__grid">
@@ -226,7 +242,7 @@
     </div>
     <div class="foot__line">
       <span>© 2026 Víctor Parra</span>
-      <span class="mono" id="app-version">v1.0.0</span>
+      <span class="mono" id="app-version">v1.2.0</span>
     </div>
   </footer>
 

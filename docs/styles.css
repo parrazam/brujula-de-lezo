@@ -335,23 +335,50 @@ html.theme-dark .theme-toggle .icon-moon { display: none; }
 
 /* Pantalla de la app (réplica de CompassScreen) */
 .screen {
-  height: 100%; padding: 46px 18px 22px;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 18px;
+  height: 100%; padding: 46px 14px 22px;
+  display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+  gap: 12px;
   text-align: center;
 }
 .screen--light { background: var(--pergamino); color: var(--cuero); }
 .screen--dark  { background: var(--abismo); color: hsl(41 42% 84%); }
 
-.albion {
-  font-family: var(--serif);
-  font-weight: 500;
-  font-size: 1.05rem;
-  line-height: 1.2;
-  color: var(--borgona);
-  padding: 0 8px;
+/* Fila superior: pastilla de estado centrada y botón de ajustes a la derecha (sin título). */
+.app-top {
+  position: relative; width: 100%;
+  display: flex; justify-content: center; align-items: center;
+  min-height: 26px; padding: 0 24px;
 }
-.screen--dark .albion { color: var(--borgona-vivo); }
+.app-gear { position: absolute; right: 0; width: 16px; height: 16px; color: currentColor; opacity: .85; }
+.app-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--sans); font-weight: 600; font-size: 0.62rem; line-height: 1.2;
+  padding: 5px 9px; border-radius: 999px; white-space: nowrap;
+}
+.app-pill__dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.app-pill--hit { background: var(--borgona); color: hsl(35 100% 95%); }
+.screen--dark .app-pill--hit { background: hsl(4 58% 44%); }
+.app-pill--ok { background: hsl(80 25% 86%); color: hsl(84 35% 26%); }
+.screen--dark .app-pill--ok { background: hsl(100 26% 16%); color: hsl(80 45% 68%); }
+
+/* Tarjeta «Londres está a»: la única superficie con relleno de la pantalla. */
+.app-card {
+  width: 100%; box-sizing: border-box;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 4px;
+  padding: 11px 14px; border-radius: 16px; text-align: left;
+  background: var(--azul-imperial); color: var(--pergamino);
+  font-family: var(--sans);
+}
+.screen--dark .app-card { background: hsl(214 47% 18%); color: hsl(41 60% 80%); }
+.app-card__label { font-size: 0.56rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; opacity: .7; }
+.app-card__big { font-family: var(--serif); font-weight: 800; font-size: 1.7rem; line-height: 1; font-variation-settings: "opsz" 48; }
+.app-card__big small { font-family: var(--sans); font-weight: 600; font-size: 0.8rem; margin-left: 4px; }
+.app-card__facts {
+  display: flex; gap: 18px; width: 100%;
+  margin-top: 6px; padding-top: 7px; border-top: 1px solid hsl(41 52% 88% / 0.18);
+}
+.app-card__facts > span { display: flex; flex-direction: column; font-size: 0.58rem; opacity: .75; }
+.app-card__facts b { font-size: 0.78rem; font-weight: 600; opacity: 1; }
 
 .compass {
   position: relative;
@@ -568,10 +595,9 @@ html.theme-dark .theme-toggle .icon-moon { display: none; }
   .foot__line { flex-direction: column; align-items: flex-start; }
   .phone { width: 260px; height: 540px; }
   .phone--back { transform: rotate(-6deg) scale(0.92); }
-  .screen { padding: 42px 14px 18px; gap: 14px; }
+  .screen { padding: 42px 14px 18px; gap: 10px; }
   .compass { width: 180px; height: 180px; }
-  .albion { font-size: 0.95rem; }
-  .quote { font-size: 0.85rem; }
+  .quote { font-size: 0.8rem; }
 }
 
 /* Reduce motion */
