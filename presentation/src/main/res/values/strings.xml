@@ -45,12 +45,8 @@
     <string name="settings_vibration">Vibrar al apuntar</string>
     <string name="settings_vibration_hint">Un toque al entrar en ±5°</string>
     <string name="settings_privacy">Política de privacidad</string>
-    <string name="settings_licenses">Licencias</string>
     <string name="settings_version">Versión</string>
     <string name="settings_privacy_url" translatable="false">https://brujuladelezo.cuzo.dev/privacy.html</string>
-    <string name="licenses_title">Licencias</string>
-    <string name="licenses_body">Fraunces, © The Fraunces Project Authors, e IBM Plex Sans, © IBM Corp., se distribuyen con la licencia SIL Open Font License 1.1. Los textos completos están en la carpeta licenses/ del código fuente.</string>
-    <string name="licenses_close">Cerrar</string>
 
     <string name="no_compass_sensor">Tu dispositivo no tiene brújula.</string>
 </resources>

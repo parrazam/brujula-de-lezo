@@ -12,8 +12,9 @@ import com.brujuladelezo.designsystem.R
 
 /*
  * Las mismas familias que la web (docs/): Fraunces para títulos, la cita y la distancia; IBM Plex
- * Sans para todo lo demás. Van empaquetadas (TTF estáticos, subconjunto latino, licencias OFL en
- * licenses/) porque FontFamily.Serif cambiaba según el fabricante. Plex tiene cifras tabulares
+ * Sans para todo lo demás. Van empaquetadas (TTF estáticos, subconjunto latino) porque
+ * FontFamily.Serif cambiaba según el fabricante. Cada TTF lleva su copyright y el texto de la
+ * OFL en los metadatos (name ID 0 y 13), y los textos completos van en assets/licenses/. Plex tiene cifras tabulares
  * por defecto, así que los grados no bailan al girar; Fraunces no, y por eso no se usa para
  * números que cambian a menudo.
  */
