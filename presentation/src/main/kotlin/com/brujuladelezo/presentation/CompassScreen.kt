@@ -67,7 +67,6 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
@@ -100,6 +99,9 @@ private val WideGap = 32.dp
 private val MaxDialSize = 420.dp
 private val MinDialSize = 200.dp
 private val MaxCardWidth = 520.dp
+
+/** Tamaño táctil mínimo de Material: lo que ocupa el IconButton de ajustes. */
+private val SettingsButtonSize = 48.dp
 private val TallGap = 12.dp
 
 private const val LOCATION_PERMISSION = Manifest.permission.ACCESS_COARSE_LOCATION
@@ -237,7 +239,7 @@ internal fun CompassContent(
 }
 
 /**
- * Cabecera, hueco de estado, tarjeta y cita miden lo que miden; la rosa se queda con el resto, así
+ * La fila superior (estado y ajustes), la tarjeta y la cita miden lo que miden; la rosa se queda con el resto, así
  * que no puede invadir ni la pastilla de "apuntando" ni la tarjeta (era lo que pasaba con una rosa de
  * tamaño fijo y el mensaje apareciendo encima). Si lo que queda no llega a [MinDialSize] (letra
  * muy grande en una pantalla baja), la rosa se queda en ese mínimo, todo se apila y la pantalla
@@ -255,8 +257,7 @@ private fun TallLayout(
     val verticalPadding = 16.dp
     Layout(
         content = {
-            Header(onOpenSettings)
-            StatusSlot(status)
+            TopBar(status, onOpenSettings)
             Dial(uiState, needleRotation, Modifier.fillMaxSize())
             DirectionCard(uiState, distanceUnit)
             Quote()
@@ -269,26 +270,23 @@ private fun TallLayout(
         val gap = TallGap.roundToPx()
         val width = constraints.maxWidth
         val loose = Constraints(maxWidth = width)
-        val header = measurables[0].measure(loose)
-        val slot = measurables[1].measure(loose)
+        val top = measurables[0].measure(loose)
         // En tablet en vertical, a todo el ancho la tarjeta quedaba como una franja vacía.
-        val card = measurables[3].measure(Constraints(maxWidth = minOf(width, MaxCardWidth.roundToPx())))
-        val quote = measurables[4].measure(loose)
+        val card = measurables[2].measure(Constraints(maxWidth = minOf(width, MaxCardWidth.roundToPx())))
+        val quote = measurables[3].measure(loose)
 
         // verticalScroll da alto infinito: el disponible es el de la ventana menos el padding.
         val available = (viewportHeight - verticalPadding * 2).roundToPx()
-        val fixed = header.height + slot.height + card.height + quote.height + gap * 4
+        val fixed = top.height + card.height + quote.height + gap * 3
         val dialSide = minOf(width, available - fixed, MaxDialSize.roundToPx())
             .coerceAtLeast(minOf(width, MinDialSize.roundToPx()))
-        val dial = measurables[2].measure(Constraints.fixed(dialSide, dialSide))
+        val dial = measurables[1].measure(Constraints.fixed(dialSide, dialSide))
 
         val height = maxOf(available, fixed + dialSide)
         layout(width, height) {
             var y = 0
-            header.placeRelative(0, y)
-            y += header.height + gap
-            slot.placeRelative((width - slot.width) / 2, y)
-            y += slot.height + gap
+            top.placeRelative(0, y)
+            y += top.height + gap
             // La rosa, centrada en el hueco entre el estado y la tarjeta.
             val dialSpace = height - y - card.height - quote.height - gap * 2
             dial.placeRelative((width - dialSide) / 2, y + (dialSpace - dialSide) / 2)
@@ -330,29 +328,23 @@ private fun WideLayout(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Header(onOpenSettings)
-            StatusSlot(status)
+            TopBar(status, onOpenSettings)
             DirectionCard(uiState, distanceUnit)
             Quote()
         }
     }
 }
 
+/**
+ * Fila superior: el hueco de estado centrado y el botón de ajustes a la derecha. Sin título: el
+ * nombre ya va grabado en la propia rosa. El hueco reserva a cada lado el ancho del botón, así
+ * que la pastilla queda centrada en la pantalla y nunca pasa por debajo de él.
+ */
 @Composable
-private fun Header(onOpenSettings: () -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = stringResource(R.string.compass_title),
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier
-                .weight(1f)
-                .semantics { heading() },
-        )
-        IconButton(onClick = onOpenSettings) {
+private fun TopBar(status: CompassStatus, onOpenSettings: () -> Unit) {
+    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        StatusSlot(status, Modifier.padding(horizontal = SettingsButtonSize))
+        IconButton(onClick = onOpenSettings, modifier = Modifier.align(Alignment.CenterEnd)) {
             Icon(
                 imageVector = BrujulaIcons.Settings,
                 contentDescription = stringResource(R.string.settings_open),
@@ -440,10 +432,10 @@ internal fun CompassUiState.status(): CompassStatus = when {
  * alrededor se desplaza al empezar o dejar de apuntar.
  */
 @Composable
-private fun StatusSlot(status: CompassStatus) {
+private fun StatusSlot(status: CompassStatus, modifier: Modifier = Modifier) {
     val colors = BrujulaTheme.colors
     Box(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center,
     ) {
         SlotPill(
