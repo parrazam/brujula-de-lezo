@@ -71,7 +71,10 @@ jobs:
       - name: Verify 16 KB page alignment
         run: |
           APK=app/build/outputs/apk/release/brujula-de-lezo-${{ github.ref_name }}.apk
-          rm -rf so-check && unzip -q "$APK" 'lib/*' -d so-check || { echo "Sin bibliotecas nativas"; exit 0; }
+          # Sin el APK tiene que fallar: antes cualquier error de unzip pasaba por «sin nativas».
+          [ -f "$APK" ] || { echo "::error::No se encuentra $APK"; exit 1; }
+          if ! unzip -Z1 "$APK" | grep '^lib/' > /dev/null; then echo "Sin bibliotecas nativas"; exit 0; fi
+          rm -rf so-check && unzip -q "$APK" 'lib/*' -d so-check
           fail=0
           for so in so-check/lib/arm64-v8a/*.so so-check/lib/x86_64/*.so; do
             [ -e "$so" ] || continue
