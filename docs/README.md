@@ -9,7 +9,9 @@ Contiene:
 - `index.html` — landing principal
 - `privacy.html` — política de privacidad (URL exigida por Google Play Console)
 - `styles.css` — paleta exacta de la app (Siglo de Oro: azul marino imperial, oro viejo, rojo borgoña, blanco pergamino)
-- `compass_face.png` / `compass_needle.png` — rosa de los vientos y aguja, traídas del `design-system` de la app
+- `compass_face.png` / `compass_needle.png` — rosa de los vientos y aguja, traídas del `design-system` de la app (la rosa tiene que ser redonda y estar centrada en la imagen, donde pivota la aguja)
+
+Los dos móviles de la portada no son capturas: replican en HTML y CSS la pantalla de `CompassScreen` (fila de estado con el botón de ajustes, rosa, tarjeta «Londres está a» y cita), con las clases `app-*` de `styles.css`. Si cambia la pantalla de la app, hay que actualizarlos.
 - `icon.png` — icono de la app (og:image y apple-touch-icon)
 - `favicon.svg` — favicon con la estrella de la brújula
 

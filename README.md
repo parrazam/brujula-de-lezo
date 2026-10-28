@@ -21,16 +21,23 @@ Gires como gires el móvil, la aguja señala la dirección real hacia Londres (5
 - Te dice a qué **distancia** queda Londres (en kilómetros o en millas náuticas), su **rumbo** («11° NNE») y **cuánto girar** para apuntar.
 - Cuando apuntas a Inglaterra (±5°), aparece el aviso «¡Apuntando a la pérfida Albión!» y el móvil **vibra** una vez; se puede desactivar.
 - Muestra la **precisión del sensor** y avisa cuando hay que calibrarlo.
-- **Tema** claro, oscuro o el del sistema, con las fuentes Fraunces e IBM Plex Sans, e icono temático en Android 13+.
+- **Ajustes**: tema claro, oscuro o el del sistema, unidad de distancia y vibración.
+- Fuentes Fraunces e IBM Plex Sans, las mismas que la web, e icono temático en Android 13+.
 - Funciona con TalkBack: la rosa anuncia hacia dónde queda Londres.
 - En tablets y plegables rota libremente y reorganiza la pantalla en dos columnas.
 
 ## Capturas
 
 <p align="center">
-  <img src="art/screenshots-phone/01-brujula.png" alt="La brújula señalando el rumbo a Londres" width="260">
-  <img src="art/screenshots-phone/02-apuntando.png" alt="¡Apuntando a la pérfida Albión!" width="260">
-  <img src="art/screenshots-phone/03-brujula-oscuro.png" alt="Modo oscuro" width="260">
+  <img src="art/screenshots-phone/01-brujula.png" alt="La brújula con la distancia a Londres, el rumbo y cuánto girar" width="200">
+  <img src="art/screenshots-phone/02-apuntando.png" alt="¡Apuntando a la pérfida Albión!" width="200">
+  <img src="art/screenshots-phone/03-oscuro-millas.png" alt="Modo oscuro, con la distancia en millas náuticas" width="200">
+  <img src="art/screenshots-phone/04-ajustes.png" alt="Ajustes: tema, unidad de distancia y vibración" width="200">
+</p>
+
+<p align="center">
+  <img src="art/screenshots-tablet/01-apuntando.png" alt="En tablet, en dos columnas" width="400">
+  <img src="art/screenshots-tablet/02-oscuro.png" alt="En tablet, en modo oscuro" width="400">
 </p>
 
 ## Tecnología
@@ -127,3 +134,5 @@ Los artefactos de release se firman con un keystore codificado en el secret `KEY
 ## Licencia
 
 MIT © 2026 Víctor Parra
+
+Las fuentes [Fraunces](https://github.com/undercasetype/Fraunces) e [IBM Plex Sans](https://github.com/IBM/plex) se distribuyen con la licencia SIL Open Font License 1.1. Sus textos van dentro del APK (`design-system/src/main/assets/licenses/`) y en los metadatos de cada fuente.
